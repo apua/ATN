@@ -1,0 +1,4 @@
+celery==4.1.0
+CouchDB==1.1
+hug==2.3.2
+robotframework==3.0.2

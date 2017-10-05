@@ -1,0 +1,10 @@
+# ref: https://github.com/github/gitignore
+
+# Vim
+[._]*.sw[op]
+
+# Python.gitignore
+__pycache__/
+*.py[cod]
+
+venv
