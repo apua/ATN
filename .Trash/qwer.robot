@@ -1,3 +1,8 @@
+*** settings ***
+resource  resrc
+#suite setup  init
+test setup  init
+
 *** test cases ***
 
 TC 1
