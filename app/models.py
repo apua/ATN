@@ -1,10 +1,5 @@
-from hug import get, post, put, delete
-import hug
-
-
 class TestData:
-    r"""
-    A workaround version input/output test data "model" with plain text
+    r"""A workaround version input/output test data "model" with plain text.
 
     A test data includes:
 
@@ -26,8 +21,24 @@ class TestData:
     ...         }
     ...     })
     """
+    instances = {}
+    last_id = 0
+
     def __init__(self, test_data):
         self.data = test_data
+
+    def __del__(self):
+        __class__.instances[self.id] = None
+
+    def to_dict(self):
+        return {'data': self.data}
+
+    @staticmethod
+    def add(testdata):
+        __class__.last_id += 1
+        __class__.instances[__class__.last_id] = testdata
+        testdata.id = __class__.last_id
+        return testdata.id
 
     def run(self):
         create_temporary_files()
@@ -36,26 +47,5 @@ class TestData:
         return {'report': report, 'log': log, 'output': output, 'console': console}
 
 
-@get('/')
-def list():
-    return [1,2,3]
-
-
-@get('/{id}')
-def _(id: int):
-    return f'content of test case {id}'
-
-
-@post('/')
-def _(testcase: TestCase):
-    return f'generate id with testcase {testcase}'
-
-
-@put('/{id}')
-def _(id: int, body):
-    return f'{id} - {body}'
-
-
-@delete('/{id}')
-def f(id: int):
-    pass
+class ID(int):
+    """Nothing but ID"""

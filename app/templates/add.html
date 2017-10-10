@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+<h1>Add Page 🐍</h1>
+
+<form action="/" method="post">
+    <div class="form-group">
+        <label for="data">Test Suite (File)</label>
+        <textarea name="data" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-outline-primary btn-sm">Add</button>
+    </div>
+</form>
+
+<script>
+// ref: https://stackoverflow.com/questions/37629860/automatically-resizing-textarea-in-bootstrap
+document.querySelector('textarea').addEventListener('keydown', function() {
+    this.style.overflow = 'hidden';
+    this.style.paddingBottom = '25px';
+    this.style.height = 0;
+    this.style.height = this.scrollHeight + 'px';
+    }, false);
+</script>
+{% endblock %}
