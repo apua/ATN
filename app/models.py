@@ -24,6 +24,8 @@ class TestData:
     instances = {}
     last_id = 0
 
+    example = '***test cases***\n1st Case\n    log_to_console  suite 1\n'
+
     def __init__(self, test_data):
         self.data = test_data
 
