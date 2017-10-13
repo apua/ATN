@@ -4,9 +4,9 @@
 <h1>List Page 🍖</h1>
 
 <div class="list-group">
-    {% for id, testdata in TestData.instances.items() %}
-    <a href="/{{ id }}/detail" class="list-group-item list-group-item-action">
-        <pre>{{testdata.data}}</pre>
+    {% for td in TestData.objects.all() %}
+    <a href="/{{ td.id }}/detail" class="list-group-item list-group-item-action">
+        <pre>{{ td.data }}</pre>
     </a>
     {% endfor %}
 </div>

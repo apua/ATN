@@ -2,9 +2,11 @@
 
 
 {% block body %}
-<h1>Detail Page of ID "{{ id }}" 👍</h1>
+{% with td = get_testdata(id) %}
+<h1>Detail Page of ID "{{ td.id }}" 👍</h1>
 
 <div class="card">
-    <pre>{{ detail }}</pre>
+    <pre>{{ td.data }}</pre>
 </div>
+{% endwith %}
 {% endblock %}

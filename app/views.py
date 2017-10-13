@@ -21,7 +21,7 @@ def _():
 
 @get('/{id:uuid}/detail', output=html_format)
 def _(id: Id):
-    return env.get_template('detail.html').render(id=id, detail=get_testdata(id)['data'])
+    return env.get_template('detail.html').render(**locals(), **globals())
 
 
 @get('/add', output=html_format)
