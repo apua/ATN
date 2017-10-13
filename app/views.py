@@ -26,6 +26,12 @@ def _(id: Id):
 
 @get('/add', output=html_format)
 def _():
+    from textwrap import dedent
+    example = dedent("""\
+            ***test cases***
+            1st Case
+                log_to_console  suite 1
+            """)
     return env.get_template('add.html').render(**locals(), **globals())
 
 

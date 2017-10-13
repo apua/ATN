@@ -37,10 +37,8 @@ class DocumentManager:
         return [self.get(id) for id in self.db]
 
 
-class TestData(Document):
-    data = TextField()
+class ImprovedDocument(Document):
     objects = DocumentManager(db)
-    example = '***test cases***\n1st Case\n    log_to_console  suite 1\n'
 
     def save(self):
         _v('db')
@@ -63,7 +61,9 @@ class TestData(Document):
         _v('d')
         return self._data.update(d)
 
-    # def run(self): "run job by another model
+
+class TestData(ImprovedDocument):
+    data = TextField()
 
 
 class Id(str):
