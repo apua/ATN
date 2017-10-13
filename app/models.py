@@ -53,8 +53,11 @@ class TestData(Document):
     def post_schema(cls, packed):
         return cls(**packed)
 
+    def keys(self):  # with `keys` and `__getitem__`, the class itself is dict-like
+        return iter(self)
+
     def to_json(self):
-        return {'id': self.id, **self._data}
+        return {'id': self.id, **self}
 
     def update(self, d):
         _v('d')
