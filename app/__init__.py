@@ -34,8 +34,12 @@ def _():
 
 @hug.get('/{suite_id:uuid}', output=html_format)
 def _(suite_id: Id):
-    return env.get_template('detail.html').render(suite=get_suite(suite_id))
+    return env.get_template('detail.html').render(suite=get_suite(suite_id),
+                                                  results=list_results(suite_id))
 
+@hug.get('/{suite_id:uuid}/result/{result_id:uuid}', output=html_format)
+def _(suite_id: Id, result_id: Id):
+    return get_result(result_id).log
 
 @hug.get('/add', output=html_format)
 def _():
@@ -49,7 +53,10 @@ def _():
 
 @hug.post('/api')
 def _(body, request, response):
-    suite = new_suite(body)
+    if 'id' in body and 'rev' in body:
+        suite = Suite(**body)
+    else:
+        suite = new_suite(body)
     put2db(suite)
     if request.user_agent and 'Mozilla' in request.user_agent:  # browser
         response.status = hug.HTTP_303

@@ -4,7 +4,38 @@
 {% block body %}
 <h1>Detail Page of ID "{{ suite.id }}" 👍</h1>
 
-<div class="card">
-    <pre>{{ suite.data }}</pre>
-</div>
+<form action="/api" method="post">
+    <input type="hidden" name="id" value="{{ suite.id }}" />
+    <input type="hidden" name="rev" value="{{ suite.rev }}" />
+
+    <div class="form-group">
+        <label for="data">Test Suite (File)</label>
+        <textarea name="data" class="form-control">{{ suite.data }}</textarea>
+    </div>
+    <div class="btn-group" role="group" aria-label="Button group with ...">
+        <button type="submit" class="btn btn-outline-primary btn-sm">Save</button>
+        <a class="btn btn-outline-success btn-sm" href="#" role="button">Execution</a>
+        <div class="btn-group" role="group">
+             <button class="btn btn-outline-info btn-sm dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Results
+             </button>
+             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+               {% for result in results %}
+               <a class="dropdown-item" href="/{{suite.id}}/result/{{result.id}}">{{result.id}}</a>
+               {% endfor %}
+             </div>
+        </div>
+    </div>
+</form>
+
+<script>
+// ref: https://stackoverflow.com/questions/37629860/automatically-resizing-textarea-in-bootstrap
+document.querySelector('textarea').addEventListener('keydown', function() {
+    this.style.overflow = 'hidden';
+    this.style.paddingBottom = '25px';
+    this.style.height = 0;
+    this.style.height = this.scrollHeight + 'px';
+    }, false);
+document.querySelector('textarea').dispatchEvent(new Event('keydown'));
+</script>
 {% endblock %}

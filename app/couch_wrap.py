@@ -17,8 +17,7 @@ report document::
     "log": "<html></html>",  // log, report, and output
     "execution": {  // test execution information
         "source_id": "542b86ab0c674b1667d05a0f0c066761",
-        "source_rev": "2-0a037e8f2b39947dfe75a589b4fa6b31",
-      }
+        "source_rev": "2-0a037e8f2b39947dfe75a589b4fa6b31"
     }
   }
 
@@ -59,6 +58,7 @@ import requests
 from collections import namedtuple
 
 user, password, host, port = 'apua', 'qwer1234', 'localhost', 9453
+user, password, host, port = 'apua', 'Compaq123', '10.30.99.3', 5984
 db = 'poc'
 url = f'http://{user}:{password}@{host}:{port}'
 
@@ -113,6 +113,12 @@ def get_suite(id):
     json={"selector":{'type': 'suite', '_id': id}}
     resp = requests.post(uri, json=json)
     return Suite._fromdoc(resp.json()['docs'].pop())
+
+def get_result(id):
+    uri = f'{url}/{db}/_find'
+    json={"selector":{'type': 'result', '_id': id}}
+    resp = requests.post(uri, json=json)
+    return Result._fromdoc(resp.json()['docs'].pop())
 
 def get_uuid():
     uri = f'{url}/_uuids'
