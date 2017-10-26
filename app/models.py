@@ -1,15 +1,8 @@
-if __name__=='__main__':
-    import os, sys
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 import couchdb
 from couchdb.mapping import Document, TextField, IntegerField, DateTimeField
 
-from app.utils import _v, _t
-
 
 couch = couchdb.Server('http://apua:qwer1234@localhost:9453')
-db = couch['poc'] if 'poc' in couch else couch.create('poc')
 
 
 class DocumentManager:
@@ -38,14 +31,11 @@ class DocumentManager:
 
 
 class ImprovedDocument(Document):
-    objects = DocumentManager(db)
-
     def save(self):
-        _v('db')
-        self.store(db)
+        self.store(self._db)
 
     def delete(self):
-        del db[self.id]
+        del self._db[self.id]
 
     @classmethod
     def post_schema(cls, packed):
@@ -58,14 +48,26 @@ class ImprovedDocument(Document):
         return {'id': self.id, **self}
 
     def update(self, d):
-        _v('d')
         return self._data.update(d)
 
 
 class TestData(ImprovedDocument):
+    _dbname = 'testdata'
+    _db = couch[_dbname] if _dbname in couch else couch.create(_dbname)
+    objects = DocumentManager(_db)
     data = TextField()
+
+
+class TestResult(ImprovedDocument):
+    _dbname = 'testresult'
+    _db = couch[_dbname] if _dbname in couch else couch.create(_dbname)
+    objects = DocumentManager(_db)
+    result = TextField()
 
 
 class Id(str):
     def __new__(cls, uuid: __import__('uuid').UUID):
         return super().__new__(cls, uuid.hex)
+
+
+
