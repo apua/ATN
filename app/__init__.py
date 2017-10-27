@@ -41,6 +41,10 @@ def _(suite_id: Id):
 def _(suite_id: Id, result_id: Id):
     return get_result(result_id).log
 
+@hug.post('/{suite_id:uuid}/submit')
+def _(suite_id: Id):
+    submit(get_suite(suite_id))
+
 @hug.get('/add', output=html_format)
 def _():
     from textwrap import dedent
@@ -82,10 +86,6 @@ def _(suite_id: Id):
     delete_suite(suite_id)
 
 
-@hug.post('/api/{suite_id:uuid}/execute')
-def _(suite_id: Id): ...
-
-
 # Template render engine
 # ======================
 
@@ -95,3 +95,24 @@ env = Environment(
         loader=PackageLoader('app', 'templates'),
         autoescape=select_autoescape(['html', 'xml']),
         )
+
+env.globals['flower_host'] = '10.30.99.3:5555'
+
+
+# Task manager
+# ============
+
+from celery import Celery
+
+from .test_execution import execute
+
+queue = Celery('A___________A', backend='rpc://', broker='pyamqp://')
+
+@queue.task
+def submit(suite):
+    try:
+        log_html = execute(suite.data)
+    except DataError as e:
+        import traceback
+        log_html = f'<pre>{ "".join(traceback.format_exc()) }</pre>'
+    put2db(new_result(log_html, suite.id, suite.rev))

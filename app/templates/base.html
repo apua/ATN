@@ -15,9 +15,17 @@
     </style>
   </head>
   <body>
-    <nav class="nav">
-        <a class="nav-link" href="/add">Add</a>
-        <a class="nav-link" href="/">List</a>
+
+    <nav class="nav nav-tabs">
+        <a class="nav-link nav-item {{'active' if page=='list' else ''}}" 
+           href="/">List</a>
+        <a class="nav-link nav-item {{'active' if page=='add' else ''}}"
+           href="/add">Add</a>
+        <a class="nav-link nav-item {{'active' if page=='detail' else ''}} disabled"
+           href="#">Detail</a>
+        <a class="nav-link nav-item" 
+           target="_blank"
+           href="http://{{flower_host}}">Workers</a>
     </nav>
 
     {% block body %}{% endblock %}

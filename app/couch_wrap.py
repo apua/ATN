@@ -85,9 +85,10 @@ class Result(namedtuple('BaseResult', 'id,rev,log,execution')):
         assert doc['type'] == 'result'
         return cls(doc['_id'], doc['_rev'], doc['log'], doc['execution'])
     def _asdoc(self):
-        return {'_id': self.id, '_rev': self.rev,
-                'type': 'result',
-                'log': self.log, 'execution': self.execution}
+        if self.rev:
+            return {'_id': self.id, '_rev': self.rev, 'type': 'result', 'log': self.log, 'execution': self.execution}
+        else:
+            return {'_id': self.id, 'type': 'result', 'log': self.log, 'execution': self.execution}
 
 def list_suites():
     uri = f'{url}/{db}/_find'
@@ -128,6 +129,10 @@ def new_suite(body):
     assert 'data' in body
     new_id = get_uuid()
     return Suite(new_id, '', body['data'])
+
+def new_result(log_html, suite_id, suite_rev):
+    new_id = get_uuid()
+    return Result(new_id, '', log_html, {'source_id': suite_id, 'source_rev': suite_rev})
 
 def put2db(obj):
     return requests.put(f'{url}/{db}/{obj.id}', json=obj._asdoc())
