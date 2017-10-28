@@ -41,10 +41,6 @@ def _(suite_id: Id):
 def _(suite_id: Id, result_id: Id):
     return get_result(result_id).log
 
-@hug.post('/{suite_id:uuid}/submit')
-def _(suite_id: Id):
-    submit(get_suite(suite_id))
-
 @hug.get('/add', output=html_format)
 def _():
     from textwrap import dedent
@@ -75,15 +71,25 @@ def _(suite_id: Id):
     return get_suite(suite_id)
 
 
+@hug.post('/api/{suite_id:uuid}')
+def _(suite_id: Id):
+    submit.delay(suite_id)
+    #suite = get_suite(suite_id)
+    #print(type(suite))
+    #submit.delay(suite)
+    #submit.apply_async((suite,))
+    #submit.apply_async(args=(suite,))
+    #submit.s(suite).apply_async()
+
+
 @hug.put('/api/{suite_id:uuid}')
 def _(suite_id: Id, body):
-    suite = get_suite(id)
-    put2db(suite._replace(**body))
+    return put2db(Suite(**body))
 
 
 @hug.delete('/api/{suite_id:uuid}')
-def _(suite_id: Id):
-    delete_suite(suite_id)
+def _(suite_id: Id, rev):
+    return delete_suite(suite_id, rev).json()
 
 
 # Template render engine
@@ -97,6 +103,7 @@ env = Environment(
         )
 
 env.globals['flower_host'] = '10.30.99.3:5555'
+env.globals['flower_host'] = 'localhost:5555'
 
 
 # Task manager
@@ -104,12 +111,13 @@ env.globals['flower_host'] = '10.30.99.3:5555'
 
 from celery import Celery
 
-from .test_execution import execute
+from .test_execution import execute, DataError
 
 queue = Celery('A___________A', backend='rpc://', broker='pyamqp://')
 
 @queue.task
-def submit(suite):
+def submit(suite_id):
+    suite = get_suite(suite_id)
     try:
         log_html = execute(suite.data)
     except DataError as e:

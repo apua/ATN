@@ -58,7 +58,7 @@ import requests
 from collections import namedtuple
 
 user, password, host, port = 'apua', 'qwer1234', 'localhost', 9453
-user, password, host, port = 'apua', 'Compaq123', '10.30.99.3', 5984
+#user, password, host, port = 'apua', 'Compaq123', '10.30.99.3', 5984
 db = 'poc'
 url = f'http://{user}:{password}@{host}:{port}'
 
@@ -135,7 +135,8 @@ def new_result(log_html, suite_id, suite_rev):
     return Result(new_id, '', log_html, {'source_id': suite_id, 'source_rev': suite_rev})
 
 def put2db(obj):
-    return requests.put(f'{url}/{db}/{obj.id}', json=obj._asdoc())
+    resp = requests.put(f'{url}/{db}/{obj.id}', json=obj._asdoc())
+    return resp.json()
 
-def delete_suite(id):
-    return requests.delete(f'{url}/{db}/{id}')
+def delete_suite(id, rev):
+    return requests.delete(f'{url}/{db}/{id}?rev={rev}')
