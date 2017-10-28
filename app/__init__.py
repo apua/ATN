@@ -6,11 +6,7 @@
 
 class Id(str):
     def __new__(cls, uuid: __import__('uuid').UUID):
-        print("DEBUG:", type(uuid), uuid)
-        if isinstance(uuid, str):
-            return super().__new__(cls, uuid)
-        else:
-            return super().__new__(cls, uuid.hex)
+        return super().__new__(cls, uuid.hex)
 
 
 # CouchDB wrapper
@@ -30,7 +26,7 @@ from .couch_wrap import *
 | GET    /add                     |              | Get a page to add suite              |
 | POST   /suite                   | Suite object | Create a new suite                   |
 | GET    /suite/{id}              |              | Get the suite detail or detail page  |
-| PUT    /suite/{id}              | Suite object | Update the suite and return rev 204  |
+| PUT    /suite/{id}?rev={rev_id} | Suite object | Update the suite and return rev      |
 | DELETE /suite/{id}?rev={rev_id} |              | Delete the suite and return 200      |
 | POST   /suite/{id}?rev={rev_id} |              | Submit a test and return 202         |
 | GET    /log/{id}                |              | Get log page of the result           |
@@ -80,11 +76,11 @@ def _(id: Id, request, response):
     else:
         http.outputs = hug.output_format.json
         response.set_header('content-type', 'application/json')
-        return {'results': list_results(id), **get_suite(id)._asdict()}
+        return {'results': [r.id for r in list_results(id)], **get_suite(id)._asdict()}
 
 @hug.put('/suite/{id:uuid}')
-def _(id: Id, body):
-    return put2db(Suite(**body))
+def _(id: Id, rev, body):
+    return put2db(Suite(id, rev, **body))
 
 @hug.delete('/suite/{id:uuid}')
 def _(id: Id, rev):

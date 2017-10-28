@@ -13,7 +13,7 @@ TODO:
 
 Known Issue:
 
-- [_] sometimes `{id:uuid}` is not transformed to `uuid`
+- [✓] sometimes `{id:uuid}` is not transformed to `uuid`
   eg: PUT method via browser
 
 Other:

@@ -82,19 +82,18 @@ function notice(msg) {
 
 function save(form) {
     var xhr = new XMLHttpRequest();
-    xhr.open("PUT", `/suite/${id}`);
+    xhr.open("PUT", `/suite/${id}?rev=${rev}`);
     xhr.setRequestHeader('Content-type','application/json');
     xhr.addEventListener("load", function() {
-        // expect HTTP 204 No Content
         ({id, rev, ok} = JSON.parse(this.responseText));
         notice(`Saved. Revision: ${rev}`);
     });
-    xhr.send(JSON.stringify({'id': id, 'rev': rev, 'data': form.data.value}));
+    xhr.send(JSON.stringify({'data': form.data.value}));
 }
 
 function exec() {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", `/suite/${id}`);
+    xhr.open("POST", `/suite/${id}?rev=${rev}`);
     xhr.addEventListener("load", function() {
         notice(`DEBUG: ${this.status} - ${this.responseText}`);
     });
