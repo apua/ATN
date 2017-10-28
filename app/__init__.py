@@ -6,7 +6,11 @@
 
 class Id(str):
     def __new__(cls, uuid: __import__('uuid').UUID):
-        return super().__new__(cls, uuid.hex)
+        print("DEBUG:", type(uuid), uuid)
+        if isinstance(uuid, str):
+            return super().__new__(cls, uuid)
+        else:
+            return super().__new__(cls, uuid.hex)
 
 
 # CouchDB wrapper
@@ -18,30 +22,31 @@ from .couch_wrap import *
 # View and Routing
 # ================
 
-# /      -> landing page, list all test suites and reports
-# /add   -> adding page
-# /api/* -> provide CRUD and executio
+"""
++---------------------------------+--------------+--------------------------------------+
+|                                 | Payload      | usage                                |
++=================================+==============+======================================+
+| GET    /                        |              | Get a page listing all suites        |
+| GET    /add                     |              | Get a page to add suite              |
+| POST   /suite                   | Suite object | Create a new suite                   |
+| GET    /suite/{id}              |              | Get the suite detail or detail page  |
+| PUT    /suite/{id}              | Suite object | Update the suite and return rev 204  |
+| DELETE /suite/{id}?rev={rev_id} |              | Delete the suite and return 200      |
+| POST   /suite/{id}?rev={rev_id} |              | Submit a test and return 202         |
+| GET    /log/{id}                |              | Get log page of the result           |
++---------------------------------+--------------+--------------------------------------+
+"""
 
 
 import hug
-from hug.output_format import html as html_format
+from hug.output_format import html
 
 
-@hug.get('/', output=html_format)
+@hug.get('/', output=html)
 def _():
     return env.get_template('list.html').render(suites=list_suites())
 
-
-@hug.get('/{suite_id:uuid}', output=html_format)
-def _(suite_id: Id):
-    return env.get_template('detail.html').render(suite=get_suite(suite_id),
-                                                  results=list_results(suite_id))
-
-@hug.get('/{suite_id:uuid}/result/{result_id:uuid}', output=html_format)
-def _(suite_id: Id, result_id: Id):
-    return get_result(result_id).log
-
-@hug.get('/add', output=html_format)
+@hug.get('/add', output=html)
 def _():
     from textwrap import dedent
     return env.get_template('add.html').render(example=dedent('''\
@@ -50,46 +55,48 @@ def _():
                 log_to_console  suite 1
             '''))
 
-
-@hug.post('/api')
+@hug.post('/suite')
 def _(body, request, response):
     if 'id' in body and 'rev' in body:
         suite = Suite(**body)
     else:
         suite = new_suite(body)
     put2db(suite)
+
     if request.user_agent and 'Mozilla' in request.user_agent:  # browser
         response.status = hug.HTTP_303
-        response.location = f'/{suite.id}'
     else:
         response.status = hug.HTTP_201
-        response.location = f'/api/{suite.id}'
+    response.location = f'/suite/{suite.id}'
 
+@hug.get('/suite/{id:uuid}')
+def _(id: Id, request, response):
+    http = hug.API(__name__).http.routes['']['/suite/{id:uuid}']['GET'][None]
+    if request.user_agent and 'Mozilla' in request.user_agent:  # browser
+        http.outputs = hug.output_format.html
+        response.set_header('content-type', 'text/html')  # a workaround ?
+        return env.get_template('detail.html').render(suite=get_suite(id),
+                                                      results=list_results(id))
+    else:
+        http.outputs = hug.output_format.json
+        response.set_header('content-type', 'application/json')
+        return {'results': list_results(id), **get_suite(id)._asdict()}
 
-@hug.get('/api/{suite_id:uuid}')
-def _(suite_id: Id):
-    return get_suite(suite_id)
-
-
-@hug.post('/api/{suite_id:uuid}')
-def _(suite_id: Id):
-    submit.delay(suite_id)
-    #suite = get_suite(suite_id)
-    #print(type(suite))
-    #submit.delay(suite)
-    #submit.apply_async((suite,))
-    #submit.apply_async(args=(suite,))
-    #submit.s(suite).apply_async()
-
-
-@hug.put('/api/{suite_id:uuid}')
-def _(suite_id: Id, body):
+@hug.put('/suite/{id:uuid}')
+def _(id: Id, body):
     return put2db(Suite(**body))
 
+@hug.delete('/suite/{id:uuid}')
+def _(id: Id, rev):
+    return delete_suite(id, rev).json()
 
-@hug.delete('/api/{suite_id:uuid}')
-def _(suite_id: Id, rev):
-    return delete_suite(suite_id, rev).json()
+@hug.post('/suite/{id:uuid}')
+def _(id: Id, rev=None):
+    submit.delay(id)
+
+@hug.get('/log/{id:uuid}', output=html)
+def _(id: Id):
+    return get_result(id).log
 
 
 # Template render engine

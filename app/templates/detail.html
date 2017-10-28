@@ -3,14 +3,14 @@
 {% set page = "detail" %}
 
 {% block body %}
-<h1>Detail of Suite "{{ suite.id }}" 👍</h1>
+<h1>Detail of Suite {{suite.id}} 👍</h1>
 
 <div id="notice"></div>
 
 <form id="detail">
     <div class="form-group">
         <label for="data">Test Suite (File)</label>
-        <textarea name="data" class="form-control">{{ suite.data }}</textarea>
+        <textarea name="data" class="form-control">{{suite.data}}</textarea>
     </div>
 </form>
 
@@ -24,13 +24,15 @@
         Execution
     </button>
     <div id=results class="btn-group" role="group">
-        <button class="btn btn-outline-info btn-sm dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button class="btn btn-outline-info btn-sm dropdown-toggle"
+                id="dropdownMenuButton" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
             Results
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             {% for result in results %}
             <a class="dropdown-item" target="_blank"
-               href="/{{suite.id}}/result/{{result.id}}">{{result.id}}</a>
+               href="/log/{{result.id}}">{{result.id}}</a>
             {% endfor %}
         </div>
     </div>
@@ -80,10 +82,10 @@ function notice(msg) {
 
 function save(form) {
     var xhr = new XMLHttpRequest();
-    xhr.open("PUT", `/api/${id}`);
+    xhr.open("PUT", `/suite/${id}`);
     xhr.setRequestHeader('Content-type','application/json');
     xhr.addEventListener("load", function() {
-        // expect HTTP 204 NO Content
+        // expect HTTP 204 No Content
         ({id, rev, ok} = JSON.parse(this.responseText));
         notice(`Saved. Revision: ${rev}`);
     });
@@ -92,7 +94,7 @@ function save(form) {
 
 function exec() {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", `/api/${id}`);
+    xhr.open("POST", `/suite/${id}`);
     xhr.addEventListener("load", function() {
         notice(`DEBUG: ${this.status} - ${this.responseText}`);
     });
@@ -101,7 +103,7 @@ function exec() {
 
 function del() {
     var xhr = new XMLHttpRequest();
-    xhr.open("DELETE", `/api/${id}?rev=${rev}`);
+    xhr.open("DELETE", `/suite/${id}?rev=${rev}`);
     xhr.addEventListener("load", function() {
         notice(`DEBUG: ${this.status} - ${this.responseText}`);
         if (this.status == 200) {

@@ -6,12 +6,12 @@
 <h1>List Suites 🍖</h1>
 
 <div class="list-group">
-    {% for suite in suites%}
-    <a href="/{{ suite.id }}" class="list-group-item list-group-item-action">
+    {% for suite in suites %}
+    <a href="/suite/{{suite.id}}" class="list-group-item list-group-item-action">
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{suite.id}}</h5>
         </div>
-        <pre>{{ suite.data }}</pre>
+        <pre>{{suite.data}}</pre>
     </a>
     {% endfor %}
 </div>
