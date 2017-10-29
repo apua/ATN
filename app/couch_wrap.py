@@ -53,19 +53,15 @@ and the result::
     }
 """
 
-import requests
 
 from collections import namedtuple
 
-user, password, host, port = 'apua', 'qwer1234', 'localhost', 9453
-#user, password, host, port = 'apua', 'Compaq123', '10.30.99.3', 5984
-db = 'poc'
-url = f'http://{user}:{password}@{host}:{port}'
+import requests
+
+from .settings import url, db
+
 
 class Suite(namedtuple('BaseSuite', 'id,rev,data')):
-    #def __new__(cls, doc):
-    #    assert doc['type'] == 'suite'
-    #    return super().__new__(cls, doc['_id'], doc['_rev'], doc['data'])
     @classmethod
     def _fromdoc(cls, doc):
         assert doc['type'] == 'suite'
@@ -77,9 +73,6 @@ class Suite(namedtuple('BaseSuite', 'id,rev,data')):
             return {'_id': self.id, 'type': 'suite', 'data': self.data}
 
 class Result(namedtuple('BaseResult', 'id,rev,log,execution')):
-    #def __new__(cls, doc):
-    #    assert doc['type'] == 'result'
-    #    return super().__new__(cls, doc['_id'], doc['_rev'], doc['log'], doc['execution'])
     @classmethod
     def _fromdoc(cls, doc):
         assert doc['type'] == 'result'
