@@ -1,9 +1,37 @@
 ========================================================
-Geographically distributed semi-Automated Test framework
+Automated Test Network with SUT sharing
 ========================================================
 
-:thesis: https://paper.dropbox.com/doc/Geographically-distributed-semi-automated-test-framework-Fcd2daEnFbyUMmCOqTywq
+2018.02.22 Recall:
 
+The first POC targets on an improved test automation framwork;
+here the second POC has different target, which includes full
+test automation architecture and SUT sharing.
+
+- the site provides:
+
+  - SUT manager
+
+    - OOBM
+    - ownership, including reservation and auth
+
+  - image (provisioning resource, which is part of TD);
+    TC, TP and Tcond (defined as TD);
+    TL required by TC (library)
+
+  - communicate with TH via REST API
+
+  - task monitoring (may rely on `flower`)
+
+  - store test reports
+
+- TH (a.k.a test harness, defined in ISTQB)
+
+  - test automation framework (RobotFramework)
+  - multi-task server (HUG x Celery x Flower)
+  - prepare test / upload test report
+
+-------
 
 TODO:
 
