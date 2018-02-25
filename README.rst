@@ -4,8 +4,8 @@ Automated Test Network with SUT sharing
 
 2018.02.22 Recall:
 
-The first POC targets on an improved test automation framwork;
-here the second POC has different target, which includes full
+The 1st POC targets on an improved test automation framwork;
+here the 2nd POC has different target, which includes full
 test automation architecture and SUT sharing.
 
 - the site provides:
@@ -30,6 +30,12 @@ test automation architecture and SUT sharing.
   - test automation framework (RobotFramework)
   - multi-task server (HUG x Celery x Flower)
   - prepare test / upload test report
+
+In the 2nd POC, below topics are ignored and discussed in 3rd POC:
+
+- security
+- REST API data structure verification
+- detail ORM model, eg: `on_delete` behavior
 
 
 User stories
