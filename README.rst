@@ -31,41 +31,68 @@ test automation architecture and SUT sharing.
   - multi-task server (HUG x Celery x Flower)
   - prepare test / upload test report
 
+
+Installation and Setup
+======================
+
+There are two parts: `website`_ and `harness`_
+
+Website
 -------
 
-TODO:
+(ry
 
-- [✓] redefine and merge API
-- [_] decouple app
-- [_] validate `id` and `rev` for distributed system
+Harness
+-------
 
-Known Issue:
+Dependency:
 
-- [✓] sometimes `{id:uuid}` is not transformed to `uuid`
-  eg: PUT method via browser
+- Django
+- Celery
+- RabbitMQ
+- Flower (optional)
+- gunicorn (unused so far)
 
-Other:
 
-- [_] merge list, add, and detail page
-- [_] dismissible notice
+Setup and start development web server:
+
+.. code:: sh
+
+    $ cd harness
+    $ ./manage.py migrate
+    $ ./manage.py createsuperuser
+    $ ./manage.py runserver
+
+
+Install RabbitMQ:
+
+.. code:: sh
+
+    $ pkg install rabbitmq
+    $ echo 'rabbitmq_enable="YES"' >> /etc/rc.conf
+    $ service rabbitmq start
 
 
 Enable test execution workers:
 
 .. code:: sh
 
-    $ celery -A app.tasks worker
-    $ flower -A app.tasks
+    $ cd harness
+    $ celery worker -A harness -c 2
 
-Enable web server (not recommended use `hug` command because
-it starts slowly and cannot auto-reload properly):
 
-.. code:: sh
+Monitoring (optional):
 
-    $ gunicorn app:__hug_wsgi__ --log-level=DEBUG
+1. Celery events
 
-Interactive with submodule during development, for example, `couch_wrap`:
+   .. code:: sh
 
-.. code:: sh
+       $ cd harness
+       $ celery events -A harness
 
-    $ python -i -c 'from app.couch_wrap import *'
+2. Flower
+
+   .. code:: sh
+
+       $ cd harness
+       $ celery flower -A harness
