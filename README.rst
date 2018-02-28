@@ -32,6 +32,47 @@ test automation architecture and SUT sharing.
   - prepare test / upload test report
 
 
+User stories
+============
+
+A.  As a local tester, a test harness with webUI allows me to do things below,
+    so that I can run automated test:
+
+    1.  manage test data, including ISO image for auto-provisioing
+    #.  manage test libraries
+    #.  indicate test data and then execute test
+    #.  auto-fetch things like ISO image and test libraries required by
+        started test execution
+    #.  monitoring specified test execution status
+        by the combination of timestamp and test data
+        (with arguments like SUTs info)
+    #.  store test reports
+
+B.  As a remote tester, a website on public allows me to do things below,
+    so that I can invoke shared SUTs to run automated test:
+
+    1.  multiple test harnesses register on the website
+    #.  reserve SUTs for later use
+    #.  manage test data
+    #.  give information below and execute test:
+
+        -   test data
+        -   required stuff including ISO image for auto-provisioing and
+            test libraries
+        -   SUTs info under the same harness
+
+    #.  monitoring specified test execution status
+        by the combination of test harness, timestamp, and test data
+        (with arguments like SUTs info)
+    #.  store test reports
+
+.. note:: not "semi-automated" test
+
+.. note:: setup/teardown test environment is part of test execution
+
+.. note:: not consider one test execution with multiple test harnesses
+
+
 Installation and Setup
 ======================
 
