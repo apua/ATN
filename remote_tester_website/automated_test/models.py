@@ -5,16 +5,16 @@ from django.conf import settings
 
 
 class Harness(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ip = models.GenericIPAddressField(protocol='IPv4')
+    def __str__(self): return self.ip.__str__()
 
 
 class Sut(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
     harness = models.ForeignKey(Harness, on_delete=models.CASCADE)
-
-    #from django.contrib.postgres.fields import JSONField
-    #oobm = models.JSONField()
+    oobm = models.TextField()
+    def __str__(self): return self.oobm.__str__()
 
 
 class Reservation(models.Model):
