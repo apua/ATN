@@ -143,3 +143,35 @@ Monitoring (optional):
 
        $ cd harness
        $ celery flower -A harness
+
+
+Development Guide
+=================
+
+At 2018.03.01, I have a lesson:
+
+-   Set my signature correctly -- "Apua <Apua.A.Aa@gmail.com>".
+
+-   Avoid `git rebase` as much as possible because it is not only
+    conflict with upstream (e.g. Github) but also have too much power
+    to make information complicated.
+
+-   Avoid `git reset HEAD@{x}` (`reflog`) as much as possible because
+    it add steps into `reflog` as many as `reset` and less possible to save
+    incorrect last operations.
+
+-   There is relationship between user story, Django project and app, and
+    version control branch. Thinking hierarchy carefully is helpful for naming.
+
+-   (Conti.) A version control branch maps to a main user story (i.e. feature).
+
+-   (Conti.) A Django app maps to a main user story (i.e. feature).
+
+-   Require commit log convention for classification; here I have:
+
+    *   chore -- misc.
+    *   doc -- document updating
+    *   local -- implementation of main user story A
+    *   remote -- implementation of main user story B
+
+-   Development process may be changed, not afraid and repond to change.
