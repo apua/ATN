@@ -171,7 +171,6 @@ At 2018.03.01, I have a lesson:
 
     *   chore -- misc.
     *   doc -- document updating
-    *   local -- implementation of main user story A
-    *   remote -- implementation of main user story B
+    *   poc -- mess during POC
 
 -   Development process may be changed, not afraid and repond to change.
