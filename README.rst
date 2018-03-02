@@ -89,8 +89,8 @@ Website
 
 (ry
 
-Harness
--------
+Local Tester Website
+--------------------
 
 Dependency:
 
@@ -105,7 +105,7 @@ Setup and start development web server:
 
 .. code:: sh
 
-    $ cd harness
+    $ cd local_tester_website
     $ ./manage.py migrate
     $ ./manage.py createsuperuser
     $ ./manage.py runserver
@@ -124,8 +124,8 @@ Enable test execution workers:
 
 .. code:: sh
 
-    $ cd harness
-    $ celery worker -A harness -c 2
+    $ cd local_tester_website
+    $ celery worker -A local_tester_website -E -c 2  # `-E` necessary?
 
 
 Monitoring (optional):
@@ -134,12 +134,12 @@ Monitoring (optional):
 
    .. code:: sh
 
-       $ cd harness
-       $ celery events -A harness
+       $ cd local_tester_website
+       $ celery events -A local_tester_website
 
 2. Flower
 
    .. code:: sh
 
-       $ cd harness
-       $ celery flower -A harness
+       $ cd local_tester_website
+       $ celery flower -A local_tester_website
