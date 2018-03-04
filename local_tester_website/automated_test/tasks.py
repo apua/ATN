@@ -1,4 +1,4 @@
-"""
+r"""
 This module implements method to "submit" and "stop" test execution.
 
 Current test execution steps:
@@ -7,6 +7,55 @@ Current test execution steps:
 2.  Generate test data and put them into workspace
 3.  Execute test with `pybot` (may be stopped during execution)
 4.  Collect test report is existing
+
+::
+
+    >>> from pathlib import Path
+    >>> WORKSPACE = '.'  # TODO: define :const:`WORKSPACE`
+    >>> workspace = Path.cwd() / WORKSPACE
+
+Call :func:`execute_test` directly::
+
+    >>> te = TestExecution.objects.create()
+    >>> return_code = execute_test(
+    ...     te_id=te.id,
+    ...     cmd='pybot -W 40 doctest.robot',
+    ...     td_src={
+    ...         'filename': 'doctest.robot',
+    ...         'content': (
+    ...             "*** test cases ***           \n"
+    ...             "TC                           \n"
+    ...             "    log  message  console=yes\n"
+    ...             ),
+    ...         'report': ('report.html', 'log.html', 'output.xml'),
+    ...         },
+    ...     wsp=f'{workspace}',
+    ...     )
+    >>> return_code
+    0
+
+Stored console output may be used on monitoring at Front-end::
+
+    >>> te = TestExecution.objects.get(id=te.id)
+    >>> po = Pybot.objects.filter(pid=te.pybot_pid).order_by('id')
+    >>> assert tuple(pl.output for pl in po) == (
+    ...     '========================================\n',
+    ...     'Doctest                                 \n',
+    ...     '========================================\n',
+    ...     'TC                              message\n',
+    ...     '| PASS |\n',
+    ...     '----------------------------------------\n',
+    ...     'Doctest                         | PASS |\n',
+    ...     '1 critical test, 1 passed, 0 failed\n',
+    ...     '1 test total, 1 passed, 0 failed\n',
+    ...     '========================================\n',
+    ...    f'Output:  {workspace}/output.xml\n',
+    ...    f'Log:     {workspace}/log.html\n',
+    ...    f'Report:  {workspace}/report.html\n',
+    ...     )
+    >>> # TODO: consider fetching log continuous;
+    >>> #       in other words, consider perf issue of fetching partial log
+    >>> # TODO: rename "Pybot" to "ConsoleLine"
 """
 
 
@@ -77,25 +126,49 @@ def task(func):
 
 
 @task
-def execute_test(*, te_id=None, **kw):
+def execute_test(*, te_id=None, td_src=None, wsp=None,
+                 cmd='pybot mytest.robot', **kw):
     """
     Execute test via subprocess `pybot` and collect test report.
     """
     import subprocess as sp
 
-    cmd = 'pybot mytest.robot'  # to be implemented
-    proc = sp.Popen(f'{cmd}', shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-    te = TestExecution.objects.get(pk=te_id)  # is it possible to send TestExecution obj?
+    # Setup
+    generate_test_data(test_data_source=td_src, workspace=wsp)
+
+    # Execution
+    proc = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
+    # TODO: is it possible to send TestExecution obj?
+    te = TestExecution.objects.get(pk=te_id)
     te.pybot_pid = proc.pid
     te.save()
     for line in proc.stdout:
-        Pybot(pid=pybot_pid, output=line).save  # ordered by ID, and may have perf issue
+        # TODO: ordered by ID, and may have perf issue
+        Pybot.objects.create(pid=te.pybot_pid, output=line.decode())
 
     outs, errs = proc.communicate()
     assert outs == b''
     assert errs is None
     assert proc.returncode is not None
 
-    collect_test_report()  # to be implemented
+    # Teardown
+    collect_test_report(test_data_source=td_src, workspace=wsp)  # to be implemented
 
     return proc.returncode  # refer to `pybot` for return code meaning
+
+
+def generate_test_data(test_data_source, workspace):
+    # TODO: improve API
+    import os
+    os.chdir(workspace)
+    with open(test_data_source['filename'], 'w') as f:
+        f.write(test_data_source['content'])
+
+
+def collect_test_report(test_data_source, workspace):
+    # TODO: improve API
+    import os
+    os.chdir(workspace)
+    for filename in test_data_source['report']:
+        os.remove(filename)
+    os.remove(test_data_source['filename'])
