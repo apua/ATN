@@ -7,6 +7,6 @@ def load_tests(loader, tests, ignore):
         mod = import_module(f'.{mod_name}', __package__)
         tests.addTests(doctest.DocTestSuite(mod))
 
-    doctest_it('tasks')
     doctest_it('models')
+    doctest_it('tasks')
     return tests

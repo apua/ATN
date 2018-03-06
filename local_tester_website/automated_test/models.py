@@ -7,10 +7,10 @@ Create instance and save to database in one line::
 
 Get by `id` field or `pk` argument::
 
-    >>> TestExecution.objects.get(id=1)
-    <TestExecution: TestExecution object (1)>
-    >>> TestExecution.objects.get(pk=1)
-    <TestExecution: TestExecution object (1)>
+    >>> assert TestExecution.objects.get(id=te.id) \
+    ...     == TestExecution.objects.get(pk=te.id)
+    >>> assert TestExecution.objects.get(id=te.id) \
+    ...     is not TestExecution.objects.get(pk=te.id)
 
 Arguments `pid` and `output` are required::
 
