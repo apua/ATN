@@ -43,6 +43,10 @@ from django.db import models
 
 
 class TestExecution(models.Model):
+    # TODO: ideally,
+    #    - `test_data` field is required
+    #    - `submit` and `stop` is method of `TestExecution` object
+    test_data = models.TextField(null=True)
     task_id = models.UUIDField(null=True)
     created = models.DateTimeField(auto_now_add=True)
     pybot_pid = models.PositiveSmallIntegerField(null=True)
@@ -51,3 +55,10 @@ class TestExecution(models.Model):
 class Pybot(models.Model):
     pid = models.PositiveSmallIntegerField()
     output = models.CharField(max_length=256, default=None)
+
+
+class TestResult(models.Model):
+    test_execution = models.ForeignKey(TestExecution, on_delete=models.CASCADE)
+    report = models.TextField()
+    log = models.TextField()
+    output = models.TextField()

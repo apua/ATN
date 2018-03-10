@@ -82,7 +82,7 @@ Stop a running job:
 """
 
 
-from .models import TestExecution, Pybot
+from .models import TestExecution, Pybot, TestResult
 
 
 def wait_until_task_finished(task_id, timeout):
@@ -188,5 +188,12 @@ def execute_test(*, te_id=None, td_src=None, cmd=None, **kw):
     assert outs == b''
     assert errs is None
     assert proc.returncode is not None
+
+    TestResult.objects.create(
+            test_execution=te,
+            report=open(Path(workdir)/'report.html').read(),
+            log=open(Path(workdir)/'log.html').read(),
+            output=open(Path(workdir)/'output.xml').read(),
+            )
 
     return proc.returncode  # refer to `pybot` for return code meaning
