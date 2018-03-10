@@ -159,7 +159,7 @@ def task(func):
 
 
 @task
-def execute_test(*, te_id=None, td_src=None, cmd='pybot mytest.robot', **kw):
+def execute_test(*, te_id=None, td_src=None, cmd=None, **kw):
     """
     Execute test via subprocess `pybot` and collect test report.
     """
