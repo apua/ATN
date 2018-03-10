@@ -44,6 +44,7 @@ from django.db import models
 
 class TestExecution(models.Model):
     task_id = models.UUIDField(null=True)
+    created = models.DateTimeField(auto_now_add=True)
     pybot_pid = models.PositiveSmallIntegerField(null=True)
 
 

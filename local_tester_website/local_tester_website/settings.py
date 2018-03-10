@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'TEST': {
-            'NAME': 'test.sqlie3',
+            'NAME': 'test.sqlite3',
         },
     }
 }
@@ -122,3 +122,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+ATN = {
+    #'TEST_REPORT': os.path.join(MEDIA_ROOT, 'test_report'),
+    'WORKSPACE': __import__('pathlib').Path(MEDIA_ROOT) / 'workspace',
+}
