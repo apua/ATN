@@ -31,7 +31,7 @@ Stored console output may be used on monitoring at Front-end::
     >>> from django.conf import settings
     >>> te = TestExecution.objects.get(pk=te.id)
     >>> workdir = settings.ATN['WORKSPACE'] / str(te.created)
-    >>> po = Pybot.objects.filter(pid=te.pybot_pid).order_by('id')
+    >>> po = Pybot.objects.filter(test_execution=te).order_by('id')
     >>> assert tuple(pl.output for pl in po) == (
     ...     '========================================\n',
     ...     'Doctest                                 \n',
@@ -182,7 +182,7 @@ def execute_test(*, te_id=None, td_src=None, cmd=None, **kw):
 
     for line in proc.stdout:
         # TODO: ordered by ID, and may have perf issue
-        Pybot.objects.create(pid=te.pybot_pid, output=line.decode())
+        Pybot.objects.create(test_execution=te, output=line.decode())
 
     outs, errs = proc.communicate()
     assert outs == b''
