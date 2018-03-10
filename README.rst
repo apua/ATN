@@ -174,3 +174,11 @@ At 2018.03.01, I have a lesson:
     *   poc -- mess during POC
 
 -   Development process may be changed, not afraid and repond to change.
+
+
+Other Considerations
+====================
+
+- Assume gateway exists
+- Assume test harness can be enable additional port with REST API
+- Test data is wrapped in JSON for REST API communication
