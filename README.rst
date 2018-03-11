@@ -41,6 +41,9 @@ In the 2nd POC, below topics are ignored and discussed in 3rd POC:
 User stories
 ============
 
+Epic story: As xxx, I want a test automation network, which shares SUTs, but
+guarantee not disturb automated test mission.
+
 A.  As a local tester, a test harness with webUI allows me to do things below,
     so that I can run automated test:
 
@@ -77,6 +80,94 @@ B.  As a remote tester, a website on public allows me to do things below,
 .. note:: setup/teardown test environment is part of test execution
 
 .. note:: not consider one test execution with multiple test harnesses
+
+
+Acceptance Criteria of Story A
+------------------------------
+
+-   [ ] user roles: tester, administrator
+
+-   [ ] I can register SUTs where "reserved_by" is me, "maintained_by" is me
+
+-   [ ] no one can reserve the SUTs I reserved
+
+-   [ ] only I can change my SUTs "reserved_by"
+
+-   [ ] I can reserve a SUT from no one reserved
+
+-   [ ] only I can change my SUTs "maintained_by"
+
+-   [ ] I cannot change my SUTs "maintained_by" to null
+
+-   [ ] I can list my SUTs only
+
+-   [ ] I can create TD where
+
+    -   author (me)
+
+    -   last modified
+
+    -   optional "refer_to" to indicate the test plan written by SME
+
+    -   suites:
+
+        -   TC
+        -   variables (including ISO images)
+        -   keywords
+        -   TL
+        -   TR (including variables, keywords, TL)
+
+-   [ ] anyone can copy my TD that all data the same in addition to
+    they are author
+
+-   [ ] I can list my TD only
+
+-   [ ] I can search TD
+
+    - "refer_to"
+    - suites name
+
+-   [ ] I can only execute my TD with my SUTs
+
+-   [ ] test execution will fetch ISO/TL/TR automatically
+
+-   [ ] I can search TE by "start" and "tester" is me
+
+-   [ ] TE are read-only
+
+-   [ ] I can get TE console, status (running/finished), TD which executed with,
+    the original TD source, TR
+
+-   [ ] I can modify TD, even if it has been executed before
+
+-   [ ] I can get TR by TE start, including console, report.html, log.html,
+    output.xml, where html/xml is in iframe
+
+
+Assumptions of Story A
+----------------------
+
+-   assume RQ worker is enough to run test execution immediately (in fact,
+    developer can take # of RQ workers as many as # of SUTs)
+
+-   there may be more than one local tester
+
+-   test harness has public IP, or the gateway has been set port forwarding (
+    i.e. remote can access local site)
+
+-   test harness can take additional port for REST API
+
+-   every SUTs has maintainer, but may no one reserve it
+
+-   reservation cannot set "until" so far, and no one can reserve future
+    released SUT, either
+
+
+Enhancement
+===========
+
+As a huge workload tester, I want an overview of my SUTs and Test executions
+so that I can .... ??
 
 
 Installation and Setup
@@ -174,11 +265,3 @@ At 2018.03.01, I have a lesson:
     *   poc -- mess during POC
 
 -   Development process may be changed, not afraid and repond to change.
-
-
-Other Considerations
-====================
-
-- Assume gateway exists
-- Assume test harness can be enable additional port with REST API
-- Test data is wrapped in JSON for REST API communication
