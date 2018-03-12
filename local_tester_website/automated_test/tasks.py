@@ -61,8 +61,9 @@ Submit a task (sleep 5 seconds)::
     ...         "    sleep  5      \n"
     ...         ),
     ...     }
-    >>> te = submit_test_execution(td_src)
-    >>> wait_until_task_finished(te.task_id, timeout=6)
+    >>> te_id = submit_test_execution(td_src)
+    >>> task_id = TestExecution.objects.get(pk=te_id).task_id.__str__()
+    >>> wait_until_task_finished(task_id, timeout=6)
 
 Stop a running job:
 
@@ -75,17 +76,18 @@ Stop a running job:
     ...         "    sleep  5      \n"
     ...         ),
     ...     }
-    >>> te = submit_test_execution(td_src)
+    >>> te_id = submit_test_execution(td_src)
     >>> sleep(1)
-    >>> stop_test_execution(te.id)
-    >>> wait_until_task_finished(te.task_id, timeout=2)
+    >>> stop_test_execution(te_id)
+    >>> task_id = TestExecution.objects.get(pk=te_id).task_id.__str__()
+    >>> wait_until_task_finished(task_id, timeout=2)
 """
 
 
 from .models import TestExecution, Pybot, TestResult
 
 
-def wait_until_task_finished(task_id, timeout):
+def wait_until_task_finished(task_id: str, timeout):
     from time import sleep
     from rq.job import Job
     from redis import Redis
@@ -103,6 +105,7 @@ def stop_test_execution(te_id):
     import os, signal, time
 
     pid = TestExecution.objects.get(pk=te_id).pybot_pid
+    assert pid is not None
     os.kill(pid, signal.SIGINT)
 
 
@@ -112,9 +115,9 @@ def submit_test_execution(td_src: dict) -> TestExecution:
             te_id=te.id, td_src=td_src,
             cmd=f'pybot {td_src["filename"]}'
             )
-    te.task_id = rq_job.id  # update RQ job id
-    te.save()
-    return te
+    TestExecution.objects.filter(pk=te.id).update(task_id=rq_job.id)
+    assert type(rq_job.id) is str
+    return te.id
 
 
 def task(func):
@@ -176,9 +179,7 @@ def execute_test(*, te_id=None, td_src=None, cmd=None, **kw):
         f.write(td_src['content'])
 
     proc = sp.Popen(cmd, cwd=workdir, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-    # TODO: is it possible to send TestExecution obj?
-    te.pybot_pid = proc.pid
-    te.save()
+    TestExecution.objects.filter(pk=te.id).update(pybot_pid=proc.pid)
 
     for line in proc.stdout:
         # TODO: ordered by ID, and may have perf issue
