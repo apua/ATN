@@ -1,12 +1,17 @@
-import doctest
-from django.test import TestCase
+from doctest import DocTestSuite
+from importlib import import_module
+
+
+MODULE_NAMES = ('models', 'tasks')
+
+doctest_suites = {
+       mod_name: DocTestSuite(import_module(f'.{mod_name}', __package__))
+       for mod_name in MODULE_NAMES
+       }
+globals().update(doctest_suites)
+
 
 def load_tests(loader, tests, ignore):
-    def doctest_it(mod_name):
-        from importlib import import_module
-        mod = import_module(f'.{mod_name}', __package__)
-        tests.addTests(doctest.DocTestSuite(mod))
-
-    doctest_it('models')
-    doctest_it('tasks')
+    for suite in doctest_suites.values():
+        tests.addTests(suite)
     return tests
