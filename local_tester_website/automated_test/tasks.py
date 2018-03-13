@@ -28,7 +28,7 @@ Call :func:`execute_test` directly::
 
     >>> from django.conf import settings
     >>> te = TestExecution.objects.get(pk=te_pk)
-    >>> workdir = settings.ATN['WORKSPACE'] / str(te.created)
+    >>> workdir = settings.ATN['WORKSPACE'] / str(te.start)
     >>> consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
     >>> assert tuple(c.output for c in consoles) == (
     ...     '========================================\n',
@@ -103,7 +103,7 @@ Stop a running job:
 """
 
 
-from .models import TestExecution, ConsoleLine, TestResult
+from .models import TestData, TestExecution, ConsoleLine, TestResult
 
 
 def wait_until_task_finished(rq_jid: str, timeout):
@@ -171,7 +171,7 @@ def task(func):
 
 
 @task
-def execute_test(*, td_src=None, cmd=None, **kw):
+def execute_test(*, td_src=None, cmd=None, td_id=None, **kw):
     """
     Execute test via subprocess `pybot` and collect test report.
     """
@@ -184,11 +184,15 @@ def execute_test(*, td_src=None, cmd=None, **kw):
 
     rq_job = get_current_job()
     rq_jid = uuid4() if rq_job is None else UUID(rq_job.id)
-    te = TestExecution.objects.create(pk=rq_jid, test_data=td_src)
-    assert rq_job is None or type(rq_job.id) is str
-    assert type(te.pk) is UUID
+    assert type(rq_jid) is UUID
 
-    workdir = settings.ATN['WORKSPACE'] / str(te.created)
+    if td_id is not None:
+        td = TestData.objects.get(pk=td_id)
+        te = TestExecution.objects.create(pk=rq_jid, test_data=td, origin=td.test_data)
+    else:
+        te = TestExecution.objects.create(pk=rq_jid)
+
+    workdir = settings.ATN['WORKSPACE'] / str(te.start)
     workdir.mkdir(parents=True)
     with open(Path(workdir)/td_src['filename'], 'w') as f:
         f.write(td_src['content'])

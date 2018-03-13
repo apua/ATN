@@ -1,23 +1,16 @@
 r"""
-
 `TestExecution` use RQ queue ID an UUID as primary key::
 
     >>> from uuid import uuid4
     >>> rq_jid = uuid4()
     >>> te = TestExecution.objects.create(
     ...     pk=rq_jid,
-    ...     test_data={},
+    ...     origin=default_test_data,
     ...     )
     >>> assert te.pk == te.rq_jid
 
-Don't insert bytes string into `output` char field::
+(conti.) Don't insert bytes string into `output` char field::
 
-    >>> from uuid import uuid4
-    >>> rq_jid = uuid4()
-    >>> te = TestExecution.objects.create(
-    ...     pk=rq_jid,
-    ...     test_data={},
-    ...     )
     >>> pb = ConsoleLine.objects.create(test_execution=te, output='')
 
     >>> pb.output = b'3 critical tests, 3 passed, 0 failed'
@@ -36,13 +29,28 @@ Don't insert bytes string into `output` char field::
 """
 
 
+from django.conf import settings
 from django.db import models
+
+
+default_test_data = __import__('json').dumps({
+    'filename': 'basic.robot',
+    'content': '*** test cases ***\nTC\n  log  message  console=yes\n',
+    })
+
+
+class TestData(models.Model):
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    test_data = models.TextField(default=default_test_data)  # TODO: validator
+    last_modified = models.DateTimeField(auto_now=True)
+    #refer_to = models.CharField(...)
 
 
 class TestExecution(models.Model):
     rq_jid = models.UUIDField(primary_key=True)
-    created = models.DateTimeField(auto_now_add=True)
-    test_data = models.TextField()
+    start = models.DateTimeField(auto_now_add=True)
+    test_data = models.ForeignKey(TestData, on_delete=models.CASCADE, null=True)
+    origin = models.TextField(null=True)
     pid = models.PositiveSmallIntegerField(null=True)
 
     def submit(*a, **kw): ...
