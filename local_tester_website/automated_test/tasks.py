@@ -10,36 +10,34 @@ Current test execution steps:
 
 Call :func:`execute_test` directly::
 
-    >>> te = TestExecution.objects.create()
-    >>> return_code = execute_test(
-    ...     te_id=te.id,
-    ...     cmd='pybot -W 40 doctest.robot',
-    ...     td_src={
-    ...         'filename': 'doctest.robot',
-    ...         'content': (
-    ...             "*** test cases ***           \n"
-    ...             "TC                           \n"
-    ...             "    log  message  console=yes\n"
-    ...             ),
-    ...         },
+    >>> td_src={
+    ...     'filename': 'basic.robot',
+    ...     'content': (
+    ...         "*** test cases ***           \n"
+    ...         "TC                           \n"
+    ...         "    log  message  console=yes\n"
+    ...         ),
+    ...     }
+    >>> te_pk, return_code = execute_test(
+    ...     cmd=f'pybot -W 40 {td_src["filename"]}',
+    ...     td_src=td_src,
     ...     )
-    >>> return_code
-    0
+    >>> assert return_code == 0
 
-Stored console output may be used on monitoring at Front-end::
+(cont.) Stored console output can be used on monitoring at Front-end::
 
     >>> from django.conf import settings
-    >>> te = TestExecution.objects.get(pk=te.id)
+    >>> te = TestExecution.objects.get(pk=te_pk)
     >>> workdir = settings.ATN['WORKSPACE'] / str(te.created)
-    >>> po = Pybot.objects.filter(test_execution=te).order_by('id')
-    >>> assert tuple(pl.output for pl in po) == (
+    >>> consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
+    >>> assert tuple(c.output for c in consoles) == (
     ...     '========================================\n',
-    ...     'Doctest                                 \n',
+    ...     'Basic                                   \n',
     ...     '========================================\n',
     ...     'TC                              message\n',
     ...     '| PASS |\n',
     ...     '----------------------------------------\n',
-    ...     'Doctest                         | PASS |\n',
+    ...     'Basic                           | PASS |\n',
     ...     '1 critical test, 1 passed, 0 failed\n',
     ...     '1 test total, 1 passed, 0 failed\n',
     ...     '========================================\n',
@@ -47,77 +45,88 @@ Stored console output may be used on monitoring at Front-end::
     ...    f'Log:     {workdir}/log.html\n',
     ...    f'Report:  {workdir}/report.html\n',
     ...     )
-    >>> # TODO: consider fetching log continuous;
-    >>> #       in other words, consider perf issue of fetching partial log
-    >>> # TODO: rename "Pybot" to "ConsoleLine"
 
-Submit a task (sleep 5 seconds)::
+(cont.) test result contains full console output
+
+    >>> assert te.test_result.console == (
+    ...     '========================================\n'
+    ...     'Basic                                   \n'
+    ...     '========================================\n'
+    ...     'TC                              message\n'
+    ...     '| PASS |\n'
+    ...     '----------------------------------------\n'
+    ...     'Basic                           | PASS |\n'
+    ...     '1 critical test, 1 passed, 0 failed\n'
+    ...     '1 test total, 1 passed, 0 failed\n'
+    ...     '========================================\n'
+    ...    f'Output:  {workdir}/output.xml\n'
+    ...    f'Log:     {workdir}/log.html\n'
+    ...    f'Report:  {workdir}/report.html\n'
+    ...     )
+
+
+Submit a task and get RQ job::
 
     >>> td_src = {
-    ...     'filename': 'doctest.robot',
+    ...     'filename': 'submit.robot',
     ...     'content': (
     ...         "*** test cases ***\n"
     ...         "TC                \n"
     ...         "    sleep  5      \n"
     ...         ),
     ...     }
-    >>> te_id = submit_test_execution(td_src)
-    >>> task_id = TestExecution.objects.get(pk=te_id).task_id.__str__()
-    >>> wait_until_task_finished(task_id, timeout=6)
+    >>> rq_job = execute_test.delay(
+    ...     cmd=f'pybot {td_src["filename"]}',
+    ...     td_src=td_src,
+    ...     )
+    >>> assert type(rq_job.id) is str
+    >>> wait_until_task_finished(rq_job.id, timeout=6)
 
 Stop a running job:
 
     >>> from time import sleep
     >>> td_src = {
-    ...     'filename': 'doctest.robot',
+    ...     'filename': 'stop.robot',
     ...     'content': (
     ...         "*** test cases ***\n"
     ...         "TC                \n"
     ...         "    sleep  5      \n"
     ...         ),
     ...     }
-    >>> te_id = submit_test_execution(td_src)
+    >>> rq_job = execute_test.delay(
+    ...     cmd=f'pybot {td_src["filename"]}',
+    ...     td_src=td_src,
+    ...     )
     >>> sleep(1)
-    >>> stop_test_execution(te_id)
-    >>> task_id = TestExecution.objects.get(pk=te_id).task_id.__str__()
-    >>> wait_until_task_finished(task_id, timeout=2)
+    >>> stop_test_execution(rq_job.id)
+    >>> wait_until_task_finished(rq_job.id, timeout=2)
 """
 
 
-from .models import TestExecution, Pybot, TestResult
+from .models import TestExecution, ConsoleLine, TestResult
 
 
-def wait_until_task_finished(task_id: str, timeout):
+def wait_until_task_finished(rq_jid: str, timeout):
     from time import sleep
     from rq.job import Job
     from redis import Redis
+    from uuid import UUID
 
-    job = Job.fetch(task_id, connection=Redis())
+    job = Job.fetch(rq_jid, connection=Redis())
     for _ in range(timeout):
         sleep(1)
         if job.status == 'finished':
             break
     else:
-        raise Exception(f'{job.status} is not finished')
+        raise Exception(f'{job.status} is not finished after {timeout} seconds')
 
 
-def stop_test_execution(te_id):
+def stop_test_execution(te_pk: "str | UUID"):
     import os, signal, time
 
-    pid = TestExecution.objects.get(pk=te_id).pybot_pid
+    pid = TestExecution.objects.get(pk=te_pk).pid
     assert pid is not None
     os.kill(pid, signal.SIGINT)
-
-
-def submit_test_execution(td_src: dict) -> TestExecution:
-    te = TestExecution.objects.create()
-    rq_job = execute_test.delay(
-            te_id=te.id, td_src=td_src,
-            cmd=f'pybot {td_src["filename"]}'
-            )
-    TestExecution.objects.filter(pk=te.id).update(task_id=rq_job.id)
-    assert type(rq_job.id) is str
-    return te.id
 
 
 def task(func):
@@ -162,39 +171,47 @@ def task(func):
 
 
 @task
-def execute_test(*, te_id=None, td_src=None, cmd=None, **kw):
+def execute_test(*, td_src=None, cmd=None, **kw):
     """
     Execute test via subprocess `pybot` and collect test report.
     """
     from pathlib import Path
+    from uuid import uuid4, UUID
     import subprocess as sp
 
     from django.conf import settings
+    from rq import get_current_job
 
-    te = TestExecution.objects.get(pk=te_id)
+    rq_job = get_current_job()
+    rq_jid = uuid4() if rq_job is None else UUID(rq_job.id)
+    te = TestExecution.objects.create(pk=rq_jid, test_data=td_src)
+    assert rq_job is None or type(rq_job.id) is str
+    assert type(te.pk) is UUID
+
     workdir = settings.ATN['WORKSPACE'] / str(te.created)
-
     workdir.mkdir(parents=True)
     with open(Path(workdir)/td_src['filename'], 'w') as f:
         f.write(td_src['content'])
 
     proc = sp.Popen(cmd, cwd=workdir, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-    TestExecution.objects.filter(pk=te.id).update(pybot_pid=proc.pid)
+    te.pid = proc.pid
+    te.save(update_fields=['pid'])
 
     for line in proc.stdout:
-        # TODO: ordered by ID, and may have perf issue
-        Pybot.objects.create(test_execution=te, output=line.decode())
+        ConsoleLine.objects.create(test_execution=te, output=line.decode())
 
     outs, errs = proc.communicate()
     assert outs == b''
     assert errs is None
     assert proc.returncode is not None
 
+    consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
     TestResult.objects.create(
             test_execution=te,
+            console=''.join(c.output for c in consoles),
             report=open(Path(workdir)/'report.html').read(),
             log=open(Path(workdir)/'log.html').read(),
             output=open(Path(workdir)/'output.xml').read(),
             )
 
-    return proc.returncode  # refer to `pybot` for return code meaning
+    return te.pk, proc.returncode  # return code is defined by `pybot`
