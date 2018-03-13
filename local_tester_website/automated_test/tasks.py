@@ -142,22 +142,22 @@ def task(func):
     connection = Redis()
     # NOTE: may not change RQ's default arguments as below
     #
-    # -   `timeout`
-    #         :default: None
+    #       -   `timeout`
+    #           :default: None
     #
-    #         The max job run time, it will kill `pybot` directly.
-    #         Bad for generating test report.
+    #           The max job run time, it will kill `pybot` directly.
+    #           Bad for generating test report.
     #
-    # -   `ttl`
-    #         :default: None
+    #       -   `ttl`
+    #           :default: None
     #
-    #         The max job *queue* time.
+    #           The max job *queue* time.
     #
-    # - `result_ttl`
-    #         :default: 500
+    #       -   `result_ttl`
+    #           :default: 500
     #
-    #         The expiration of stored job result.
-    #         Unimportent obviously.
+    #           The expiration of stored job result.
+    #           Unimportent obviously.
     return job(queue_name, connection=connection)(func)
 
 
