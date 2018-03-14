@@ -103,8 +103,8 @@ Acceptance Criteria of Story A
 
 -   [v] I can get TR by TE start, including console, report.html, log.html,
     output.xml
-    
-Enhance:
+
+Enhancement:
 
 -   [ ] I can list my SUTs only
 
@@ -137,6 +137,41 @@ Assumptions of Story A
 
 -   reservation cannot set "until" so far, and no one can reserve future
     released SUT, either
+
+
+Acceptance Criteria of Story B
+------------------------------
+
+-   [ ] test harness: UUID, IP
+
+-   [ ] user: UUID, email (user name)
+
+-   [ ] SUT: type, credential, maintained_by, reserved_by, TH
+
+-   [ ] register test harness -> update users & fix UUID
+    -> update SUTs & fix maintained_by/reserved_by immediately
+    -> collect TD, TE, TR
+
+-   [ ] show console incrementally during test execution
+
+-   [ ] execute test data -> user is me?
+    -> SUTs are reserved and on the same TH
+    -> copy user to TH if not exist
+    -> copy TD to TH
+    -> execute TD on TH
+    -> retrieve TE and get TR finally
+
+-   [ ] reserve SUTs -> sync to TH
+
+Enhancement:
+
+-   [ ] user save / update at TH will check remote tester site to sync
+
+
+Assumptions of Story B
+----------------------
+
+Remote tester website have full user accounts.
 
 
 Enhancement
