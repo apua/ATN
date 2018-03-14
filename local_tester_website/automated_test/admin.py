@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from .models import TestData, TestExecution
+from .models import TestData, TestExecution, Sut
 from .tasks import execute_test
 
 
@@ -32,12 +32,12 @@ class TestDataAdmin(admin.ModelAdmin):
         for _ in range(timeout):
             te = TestExecution.objects.get(pk=rq_job.id)
             if te:
-
+                link = f'<a href="/admin/automated_test/testexecution/{rq_job.id}">{te.start}</a>'
+                self.message_user(request, mark_safe(f'Start test execution at: {link}'))
                 break
             time.sleep(1)
-
-        link = f'<a href="/admin/automated_test/testexecution/{rq_job.id}">{te.start}</a>'
-        self.message_user(request, mark_safe(f'Start test execution at: {link}'))
+        else:
+            self.message_user(request, 'Unknown error to execute test', level=messages.ERROR)
 
 
 @admin.register(TestExecution)
@@ -53,3 +53,8 @@ class TestExecutionAdmin(admin.ModelAdmin):
             consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
             c = ''.join(c.output for c in consoles)
         return mark_safe(f'<pre>{c}</pre>')
+
+
+@admin.register(Sut)
+class SutAdmin(admin.ModelAdmin):
+    list_display = ('uuid', 'credential', 'reserved_by', 'maintained_by')
