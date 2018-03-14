@@ -1,11 +1,8 @@
-import json
-
 from django.contrib import admin, messages
-
-from .models import TestData, TestExecution, TestResult
-from .tasks import execute_test
-
 from django.utils.safestring import mark_safe
+
+from .models import TestData, TestExecution
+from .tasks import execute_test
 
 
 @admin.register(TestData)
@@ -14,9 +11,14 @@ class TestDataAdmin(admin.ModelAdmin):
     actions = ('execute',)
 
     def suite_name(self, td):
+        import json
+
         return json.loads(td.test_data)['filename']
 
     def execute(self, request, queryset):
+        import json
+        import time
+
         if len(queryset) != 1:
             self.message_user(request, 'Please select just one to execute', level=messages.ERROR)
             return
@@ -26,17 +28,28 @@ class TestDataAdmin(admin.ModelAdmin):
         command = f'pybot {source["filename"]}'
         rq_job = execute_test.delay(cmd=command, td_src=source, td_id=td.id)
 
+        timeout = 3
+        for _ in range(timeout):
+            te = TestExecution.objects.get(pk=rq_job.id)
+            if te:
+
+                break
+            time.sleep(1)
+
+        link = f'<a href="/admin/automated_test/testexecution/{rq_job.id}">{te.start}</a>'
+        self.message_user(request, mark_safe(f'Start test execution at: {link}'))
+
 
 @admin.register(TestExecution)
 class TestExecutionAdmin(admin.ModelAdmin):
     actions = None
-    list_display = ['start', 'tester', 'test_data']
+    list_display = ('start', 'console', 'origin')
+    list_display_links = None
 
-    def tester(self, te):
-        td = te.test_data
-        return td and td.author
-
-
-@admin.register(TestResult)
-class TestResultAdmin(admin.ModelAdmin):
-    pass
+    def console(self, te):
+        if te.test_result:
+            c = te.test_result.console
+        else:
+            consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
+            c = ''.join(c.output for c in consoles)
+        return mark_safe(f'<pre>{c}</pre>')
