@@ -82,64 +82,8 @@ B.  As a remote tester, a website on public allows me to do things below,
 Installation and Setup
 ======================
 
-There are two parts: `website`_ and `harness`_
+There are two parts: `remote_test_website` and `local_tester_website`
 
-Website
--------
+`local_tester_website` depends: Django, RQ, Redis
 
-(ry
-
-Local Tester Website
---------------------
-
-Dependency:
-
-- Django
-- Celery
-- RabbitMQ
-- Flower (optional)
-- gunicorn (unused so far)
-
-
-Setup and start development web server:
-
-.. code:: sh
-
-    $ cd local_tester_website
-    $ ./manage.py migrate
-    $ ./manage.py createsuperuser
-    $ ./manage.py runserver
-
-
-Install RabbitMQ:
-
-.. code:: sh
-
-    $ pkg install rabbitmq
-    $ echo 'rabbitmq_enable="YES"' >> /etc/rc.conf
-    $ service rabbitmq start
-
-
-Enable test execution workers:
-
-.. code:: sh
-
-    $ cd local_tester_website
-    $ celery worker -A local_tester_website -E -c 2  # `-E` necessary?
-
-
-Monitoring (optional):
-
-1. Celery events
-
-   .. code:: sh
-
-       $ cd local_tester_website
-       $ celery events -A local_tester_website
-
-2. Flower
-
-   .. code:: sh
-
-       $ cd local_tester_website
-       $ celery flower -A local_tester_website
+`remote_test_website` depends: Django
