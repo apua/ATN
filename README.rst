@@ -2,40 +2,12 @@
 Automated Test Network with SUT sharing
 ========================================================
 
-2018.02.22 Recall:
+2018.03.14:
 
-The 1st POC targets on an improved test automation framwork;
-here the 2nd POC has different target, which includes full
-test automation architecture and SUT sharing.
+Move some text to `misc.rst` and keep only user story, acceptance criteria,
+and so on, which are necessary for development.
 
-- the site provides:
-
-  - SUT manager
-
-    - OOBM
-    - ownership, including reservation and auth
-
-  - image (provisioning resource, which is part of TD);
-    TC, TP and Tcond (defined as TD);
-    TL required by TC (library)
-
-  - communicate with TH via REST API
-
-  - task monitoring (may rely on `flower`)
-
-  - store test reports
-
-- TH (a.k.a test harness, defined in ISTQB)
-
-  - test automation framework (RobotFramework)
-  - multi-task server (HUG x Celery x Flower)
-  - prepare test / upload test report
-
-In the 2nd POC, below topics are ignored and discussed in 3rd POC:
-
-- security
-- REST API data structure verification
-- detail ORM model, eg: `on_delete` behavior
+Merge `local` branch that have partial implement, and review criteria.
 
 
 User stories
@@ -99,9 +71,7 @@ Acceptance Criteria of Story A
 
 -   [ ] I cannot change my SUTs "maintained_by" to null
 
--   [ ] I can list my SUTs only
-
--   [ ] I can create TD where
+-   [v] I can create TD where
 
     -   author (me)
 
@@ -117,8 +87,26 @@ Acceptance Criteria of Story A
         -   TL
         -   TR (including variables, keywords, TL)
 
--   [ ] anyone can copy my TD that all data the same in addition to
-    they are author
+-   [v] anyone can copy from my TD
+
+-   [ ] I can only execute my TD with my SUTs
+
+-   [ ] test execution will fetch ISO/TL/TR automatically
+
+-   [v] I can search TE by "start" and "tester" is me
+
+-   [v] TE are read-only
+
+-   [v] I can get TE console, the original TD source
+
+-   [v] I can modify TD, even if it has been executed before
+
+-   [v] I can get TR by TE start, including console, report.html, log.html,
+    output.xml
+    
+Enhance:
+
+-   [ ] I can list my SUTs only
 
 -   [ ] I can list my TD only
 
@@ -127,21 +115,9 @@ Acceptance Criteria of Story A
     - "refer_to"
     - suites name
 
--   [ ] I can only execute my TD with my SUTs
+-   [ ] I can get TE status (running/finished), TD which executed with, TR
 
--   [ ] test execution will fetch ISO/TL/TR automatically
-
--   [ ] I can search TE by "start" and "tester" is me
-
--   [ ] TE are read-only
-
--   [ ] I can get TE console, status (running/finished), TD which executed with,
-    the original TD source, TR
-
--   [ ] I can modify TD, even if it has been executed before
-
--   [ ] I can get TR by TE start, including console, report.html, log.html,
-    output.xml, where html/xml is in iframe
+-   [ ] I can get TR where html/xml is in iframe
 
 
 Assumptions of Story A
@@ -173,95 +149,8 @@ so that I can .... ??
 Installation and Setup
 ======================
 
-There are two parts: `website`_ and `harness`_
+There are two parts: `remote_test_website` and `local_tester_website`
 
-Website
--------
+`local_tester_website` depends: Django, RQ, Redis
 
-(ry
-
-Harness
--------
-
-Dependency:
-
-- Django
-- Celery
-- RabbitMQ
-- Flower (optional)
-- gunicorn (unused so far)
-
-
-Setup and start development web server:
-
-.. code:: sh
-
-    $ cd harness
-    $ ./manage.py migrate
-    $ ./manage.py createsuperuser
-    $ ./manage.py runserver
-
-
-Install RabbitMQ:
-
-.. code:: sh
-
-    $ pkg install rabbitmq
-    $ echo 'rabbitmq_enable="YES"' >> /etc/rc.conf
-    $ service rabbitmq start
-
-
-Enable test execution workers:
-
-.. code:: sh
-
-    $ cd harness
-    $ celery worker -A harness -c 2
-
-
-Monitoring (optional):
-
-1. Celery events
-
-   .. code:: sh
-
-       $ cd harness
-       $ celery events -A harness
-
-2. Flower
-
-   .. code:: sh
-
-       $ cd harness
-       $ celery flower -A harness
-
-
-Development Guide
-=================
-
-At 2018.03.01, I have a lesson:
-
--   Set my signature correctly -- "Apua <Apua.A.Aa@gmail.com>".
-
--   Avoid `git rebase` as much as possible because it is not only
-    conflict with upstream (e.g. Github) but also have too much power
-    to make information complicated.
-
--   Avoid `git reset HEAD@{x}` (`reflog`) as much as possible because
-    it add steps into `reflog` as many as `reset` and less possible to save
-    incorrect last operations.
-
--   There is relationship between user story, Django project and app, and
-    version control branch. Thinking hierarchy carefully is helpful for naming.
-
--   (Conti.) A version control branch maps to a main user story (i.e. feature).
-
--   (Conti.) A Django app maps to a main user story (i.e. feature).
-
--   Require commit log convention for classification; here I have:
-
-    *   chore -- misc.
-    *   doc -- document updating
-    *   poc -- mess during POC
-
--   Development process may be changed, not afraid and repond to change.
+`remote_test_website` depends: Django

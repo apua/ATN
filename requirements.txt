@@ -1,8 +1,4 @@
-celery==4.1.0
 Django==2.0.2
-flower==0.9.2
-gunicorn==19.7.1
-hug==2.3.2
-Jinja2==2.9.6
-requests==2.18.4
 robotframework==3.0.2
+rq==0.10.0
+redis==2.10.6
