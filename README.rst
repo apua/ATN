@@ -139,43 +139,54 @@ Assumptions of Story A
 Acceptance Criteria of Story B
 ------------------------------
 
+Criteria:
+
+-   local user work as usal
+-   remote user leverage shared SUT to execute test
+-   local user can register local site
+-   all TE/TR collected to remote
+-   local and remote get synchronous SUT sharing status
+-   remote can edit TD
+-   role: tester, administrator
+
+Spec:
+
 -   [ ] test harness: UUID, IP
+-   [ ] user identification: UUID, email
+-   [ ] SUT: UUID, identification (type, credential), maintained_by, reserved_by, under
+-   [ ] TD (remote): ID, ...
+-   [ ] TD (local): ID, ...
+-   [ ] TE (local): UUID, RQ job ID, TD, origin TD, ...
+-   [ ] TE (remote): UUID, origin TD, local_done (Bool)
+-   [ ] TR: UUID, ...
 
--   [ ] user: UUID, email (user name)
+-   [ ] execute TD -> TD owner? -> SUT reserved? -> SUTs on the same TH?
+    -> cache TD at local -> remote check TE finished manually
+    -> local TE is finished -> local upload TE/TR to remote
 
--   [ ] SUT: type, credential, maintained_by, reserved_by, TH
+-   [ ] register TH -> fix user identification -> add SUTs infomation by UUID
+    -> upload TE/TR by UUID
 
--   [ ] register test harness -> update users & fix UUID
-    -> update SUTs & fix maintained_by/reserved_by immediately
-    -> collect TD, TE, TR
-
--   [ ] show console incrementally during test execution
-
--   [ ] execute test data -> user is me?
-    -> SUTs are reserved and on the same TH
-    -> copy user to TH if not exist
-    -> copy TD to TH
-    -> execute TD on TH
-    -> retrieve TE and get TR finally
-
--   [ ] reserve SUTs -> sync to TH
-
-Enhancement:
-
--   [ ] user save / update at TH will check remote tester site to sync
+-   [ ] remote user reserve SUTs -> sync to local
+-   [ ] local user reserve SUTs -> sync to remote
 
 
 Assumptions of Story B
 ----------------------
 
-Remote tester website have full user accounts.
+-   remote tester website have full user accounts.
+-   local/remote tester only work at local/remote, i.e. not require TD at both side,
+    and local/remote tester will not login to remote/local
+-   remote can access local
 
 
 Enhancement
 ===========
 
-As a huge workload tester, I want an overview of my SUTs and Test executions
-so that I can .... ??
+-   As a huge workload tester, I want an overview of my SUTs and Test executions
+    so that I can .... ??
+-   Handle local disconnect/re-connect to remote. Might use message queue
+-   Continuous monitoring test execution
 
 
 Installation and Setup
