@@ -57,19 +57,16 @@ B.  As a remote tester, a website on public allows me to do things below,
 Acceptance Criteria of Story A
 ------------------------------
 
--   [ ] user roles: tester, administrator
+-   [v] user roles: tester, administrator
 
--   [ ] I can register SUTs where "reserved_by" is me, "maintained_by" is me
+-   [v] register SUTs where "reserved_by" is me, "maintained_by" is me
 
--   [ ] no one can reserve the SUTs I reserved
+-   [ ] SUT: one cannot change "reserved_by" from me, but I can
 
--   [ ] only I can change my SUTs "reserved_by"
+-   [ ] SUT: one cannot change "maintained_by" from me, but I can
 
--   [ ] I can reserve a SUT from no one reserved
-
--   [ ] only I can change my SUTs "maintained_by"
-
--   [ ] I cannot change my SUTs "maintained_by" to null
+-   [v] SUT: always has maintainer, but may no one reserves it
+    (i.e. "maintained_by" cannot be blank, but "reserved_by" can be)
 
 -   [v] I can create TD where
 
@@ -89,7 +86,7 @@ Acceptance Criteria of Story A
 
 -   [v] anyone can copy from my TD
 
--   [ ] I can only execute my TD with my SUTs
+-   [ ] I can only execute my TD with SUTs I reserved
 
 -   [ ] test execution will fetch ISO/TL/TR automatically
 
