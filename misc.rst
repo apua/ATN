@@ -1,3 +1,12 @@
+Development flow
+================
+
+-   Objects: Epic story -> Stories -> Criteria -> Specification
+-   TDD and doctest
+-   multiple branches with Git
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Development Guide
 =================
 
