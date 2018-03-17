@@ -30,12 +30,12 @@ class TestDataAdmin(admin.ModelAdmin):
 
         timeout = 3
         for _ in range(timeout):
+            time.sleep(1)
             te = TestExecution.objects.get(pk=rq_job.id)
             if te:
                 link = f'<a href="/admin/automated_test/testexecution/{rq_job.id}">{te.start}</a>'
                 self.message_user(request, mark_safe(f'Start test execution at: {link}'))
                 break
-            time.sleep(1)
         else:
             self.message_user(request, 'Unknown error to execute test', level=messages.ERROR)
 
