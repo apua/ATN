@@ -79,10 +79,10 @@ class Sut(models.Model):
     type = models.CharField(max_length=64, default='DL380Gen9')
     credential = models.CharField(max_length=64, default='127.0.0.1:root:password')
     reserved_by = models.ForeignKey(
-            settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
             related_name='reserved_sut', null=True, blank=True,
             )
     maintained_by = models.ForeignKey(
-            settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-            related_name='maintained_sut',
+            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+            related_name='maintained_sut', null=True
             )
