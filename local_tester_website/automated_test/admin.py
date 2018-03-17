@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from .models import TestData, TestExecution, Sut
+from .models import TestData, TestExecution, Sut, ExecLayer
 from .tasks import execute_test
 
 
@@ -58,3 +58,9 @@ class TestExecutionAdmin(admin.ModelAdmin):
 @admin.register(Sut)
 class SutAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'credential', 'reserved_by', 'maintained_by')
+
+
+@admin.register(ExecLayer)
+class ExecLayerAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False

@@ -86,3 +86,8 @@ class Sut(models.Model):
             settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
             related_name='maintained_sut', null=True
             )
+
+
+class ExecLayer(models.Model):
+    uuid = models.UUIDField(primary_key=True)
+    remote = models.GenericIPAddressField(protocol='IPv4')
