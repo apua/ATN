@@ -73,6 +73,36 @@ C.  As a remote tester, I want to leverage shared resource to execute automated
     test while managing TD and collecting TR at remote,
     so that get the job done.
 
+Sequence Diagram
+----------------
+
+A.  Local tester execute automated test::
+
+        TD -> TD: create and edit TD
+        TD -> TE: execute TD
+        TE -> TE: test execution
+        TE -> TR: generate test result
+
+B.  Register and unregister local site ::
+
+        local -> remote: register by UUID and credential
+        local -> remote: add SUTs to remote and set SUTs reserved by SUT maintainer
+
+        local -> remote: unregister by UUID
+        remote -> local: set SUTs reserved by SUT maintainer and remove SUTs from remote
+
+C.  Leverage shared SUTs and execute automated test::
+
+        local -> local: release SUTs
+        local -> remote: released SUTs auto sync status to remote
+        remote -> remote: reserve SUTs
+        remote -> remote: create and edit TD
+        remote -> remote: execute TD
+        remote -> local: copy TD
+        local -> local: run TE
+        note over remote: monitor TE
+        local -> remote: generate and upload TR
+
 Acceptance Criteria
 -------------------
 
