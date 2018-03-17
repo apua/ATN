@@ -1,40 +1,59 @@
+import json
 import uuid
 
 from django.db import models
 from django.conf import settings
 
 
-class Harness(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+DEFAULT_TEST_DATA = json.dumps({
+    'filename': 'basic.robot',
+    'content': '*** test cases ***\nTC\n  log  message  console=yes\n',
+    })
+
+
+class ExecLayer(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4')
-    def __str__(self): return self.ip.__str__()
 
 
 class Sut(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    harness = models.ForeignKey(Harness, on_delete=models.CASCADE)
-    oobm = models.TextField()
-    def __str__(self): return self.oobm.__str__()
-
-
-class Reservation(models.Model):
-    sut = models.ForeignKey(Sut, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    uuid = models.UUIDField(primary_key=True)
+    exec_layer = models.ForeignKey(ExecLayer, on_delete=models.CASCADE)
+    # TODO: improve OOBM
+    type = models.CharField(max_length=64)
+    credential = models.CharField(max_length=64)
+    reserved_by = models.ForeignKey(
+            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+            related_name='reserved_sut', null=True, blank=True,
+            )
+    maintained_by = models.ForeignKey(
+            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+            related_name='maintained_sut', null=True,
+            )
 
 
 class TestData(models.Model):
-    settings = models.TextField()
-    variables = models.TextField()
-    test_cases = models.TextField()
-    keywords = models.TextField()
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    test_data = models.TextField(default=DEFAULT_TEST_DATA)
+    last_modified = models.DateTimeField(auto_now=True)
+    #refer_to = models.CharField(...)
 
 
 class TestExecution(models.Model):
-    test_data = models.ForeignKey(TestData, on_delete=models.CASCADE)
-    sut = models.ForeignKey(Sut, on_delete=models.CASCADE)
-    start_time = models.DateTimeField(auto_now_add=True)
-    end_time = models.DateTimeField()
-    test_report = models.FileField()
-    #test_report = models.FileField(upload_to='uploads/')
+    """
+    remote -> local: request with TD source
+    local -> local: create TE with TD source only
+    local -> remote: response RQ job ID
+    remote -> remote: create TE by RQ job ID and backup TD
+    """
+    rq_jid = models.UUIDField()
+    start = models.DateTimeField(auto_now_add=True)
+    test_data = models.ForeignKey(TestData, on_delete=models.SET_NULL, null=True)
+    origin = models.TextField(null=True)
+
+
+class TestResult(models.Model):
+    test_execution = models.OneToOneField(TestExecution, on_delete=models.CASCADE, related_name='test_result')
+    console = models.TextField()
+    report = models.TextField()
+    log = models.TextField()
+    output = models.TextField()
