@@ -39,7 +39,7 @@ class TestData(models.Model):
 
 
 class TestExecution(models.Model):
-    rq_jid = models.UUIDField()
+    rq_jid = models.UUIDField(null=True, blank=True)
     start = models.DateTimeField(auto_now_add=True)
     test_data = models.ForeignKey(TestData, on_delete=models.SET_NULL, null=True)
     origin = models.TextField(null=True)

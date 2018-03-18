@@ -129,6 +129,22 @@ def stop_test_execution(te_pk: "str | UUID"):
     os.kill(pid, signal.SIGINT)
 
 
+def upload_testreport(rte_id, tr):
+    import requests
+
+    remote_site = 'http://127.0.0.1:8888'  # TODO: not hard-code here
+    assert type(rte_id) is int
+    payload = {
+            "test_execution_id": rte_id,
+            "console": tr.console,
+            "report": tr.report,
+            "log": tr.log,
+            "output": tr.output,
+            }
+    resp = requests.post(f'{remote_site}/testresult/', json=payload)
+    assert resp.status_code == 200
+
+
 def task(func):
     r"""
     A wrapper of `rq.decorators.job` for simply use.
@@ -171,7 +187,7 @@ def task(func):
 
 
 @task
-def execute_test(*, td_src=None, cmd=None, td_id=None, **kw):
+def execute_test(*, td_src=None, cmd=None, td_id=None, rte_id=None):
     """
     Execute test via subprocess `pybot` and collect test report.
     """
@@ -210,12 +226,15 @@ def execute_test(*, td_src=None, cmd=None, td_id=None, **kw):
     assert proc.returncode is not None
 
     consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
-    TestResult.objects.create(
+    tr = TestResult.objects.create(
             test_execution=te,
             console=''.join(c.output for c in consoles),
             report=open(Path(workdir)/'report.html').read(),
             log=open(Path(workdir)/'log.html').read(),
             output=open(Path(workdir)/'output.xml').read(),
             )
+
+    if rte_id is not None:
+        upload_testreport(rte_id, tr)
 
     return te.pk, proc.returncode  # return code is defined by `pybot`
