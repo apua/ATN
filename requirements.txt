@@ -2,3 +2,4 @@ Django==2.0.2
 robotframework==3.0.2
 rq==0.10.0
 redis==2.10.6
+requests==2.18.4
