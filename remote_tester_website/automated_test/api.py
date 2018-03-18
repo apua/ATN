@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import csrf_exempt
 #from django.conf import settings
 
-from .models import ExecLayer, Sut
+from .models import ExecLayer, Sut, TestResult
 
 
 def get_user_or_none_by_email(email):
@@ -39,4 +39,18 @@ def unregister(request, id):
     ex = ExecLayer.objects.get(id=id)
     Sut.objects.filter(exec_layer=ex).delete()
     ex.delete()
+    return HttpResponse()
+
+
+@csrf_exempt
+@require_POST
+def upload_testresult(request):
+    j = json.loads(request.body)
+    TestResult.objects.create(
+            test_execution_id=j['test_execution_id'],
+            console=j['console'],
+            report=j['report'],
+            log=j['log'],
+            output=j['output'],
+            )
     return HttpResponse()
