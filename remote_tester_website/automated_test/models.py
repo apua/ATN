@@ -39,12 +39,6 @@ class TestData(models.Model):
 
 
 class TestExecution(models.Model):
-    """
-    remote -> local: request with TD source
-    local -> local: create TE with TD source only
-    local -> remote: response RQ job ID
-    remote -> remote: create TE by RQ job ID and backup TD
-    """
     rq_jid = models.UUIDField()
     start = models.DateTimeField(auto_now_add=True)
     test_data = models.ForeignKey(TestData, on_delete=models.SET_NULL, null=True)
