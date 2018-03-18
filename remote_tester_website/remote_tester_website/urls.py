@@ -16,6 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from automated_test.api import register, unregister, upload_testresult
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('execlayer/', register),
+    path('execlayer/<int:id>', unregister),
+    path('testresult/', upload_testresult),
 ]
