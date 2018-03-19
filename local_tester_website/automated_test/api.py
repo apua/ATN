@@ -17,7 +17,7 @@ import json
 
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 
 from . import tasks
 from . models import ConsoleLine
@@ -34,8 +34,30 @@ def execute_test(request):
 
 @require_GET
 def test_execution(request, rq_jid):
-    consoles = ConsoleLine.objects.filter(test_execution_id=rq_jid).order_by('id')
-    return HttpResponse(''.join(c.output for c in consoles))
+    from .models import TestExecution, TestResult
+    from time import sleep
+
+    def fetch_lines(te, last_id):
+        cs = ConsoleLine.objects.filter(id__gt=last_id, test_execution=te,).order_by('id')
+        lines = (c.output for c in cs)
+        if cs:
+            last_id = cs.last().id
+        return last_id, lines
+
+    def monitor(te, last_id=-1):
+        while not TestResult.objects.filter(test_execution=te):
+            last_id, lines = fetch_lines(te, last_id)
+            yield from lines
+            sleep(1)
+        last_id, lines = fetch_lines(te, last_id)
+        yield from lines
+
+    te = TestExecution.objects.get(pk=rq_jid)
+    trs = TestResult.objects.filter(test_execution=te)
+    if trs:
+        return HttpResponse(trs.first().console)
+    else:
+        return StreamingHttpResponse(monitor(te))
 
 
 from django.utils.decorators import method_decorator

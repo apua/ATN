@@ -61,15 +61,26 @@ class Te(admin.ModelAdmin):
     list_display = ('id', 'rq_jid', 'start', 'console', 'origin')
 
     def console(self, te):
-        try:
-            c = te.test_result.console
-        except:
-            resp = requests.get(f'{local_site}/testexecution/{te.rq_jid}')
-            if resp.status_code == 200:
-                c = resp.text
-            else:
-                c = None
-        return mark_safe(f'<pre>{c}</pre>')
+        html_id = f'te-id-{te.id}'
+        xhr = f'xhr{te.id}'
+        trs = TestResult.objects.filter(test_execution=te)
+        if trs:
+            return mark_safe(f'<pre id="{html_id}">{trs.first().console}</pre>')
+        else:
+            return mark_safe(f'''
+                    <pre id="{html_id}"></pre>
+                    <script>
+                    var {xhr} = new XMLHttpRequest();
+                    {xhr}.open("GET", "/testexecution/{te.rq_jid}", true);
+                    {xhr}.onreadystatechange = function() {{
+                        var s = document.querySelector("#{html_id}");
+                        if({xhr}.readyState === XMLHttpRequest.LOADING) {{
+                            s.textContent = {xhr}.responseText;
+                        }}
+                    }};
+                    {xhr}.send();
+                    </script>
+                    ''')
 
 
 admin.site.register(TestResult)

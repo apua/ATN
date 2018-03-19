@@ -78,3 +78,19 @@ class SutView(View):
         sut.maintained_by = get_user_or_none_by_email(j['maintained_by'])
         sut.save(update_fields=['reserved_by', 'maintained_by'])
         return HttpResponse()
+
+
+from django.views.decorators.http import require_GET
+from django.http import StreamingHttpResponse
+
+@require_GET
+def test_execution(request, rq_jid):
+    from requests import get
+    query_string = request.META['QUERY_STRING']
+    return StreamingHttpResponse(
+            f'{line}\n'
+            for line in get(
+                f'http://127.0.0.1:8000/testexecution/{rq_jid}?{query_string}',
+                stream=True,
+                ).iter_lines(chunk_size=1, decode_unicode=True)
+            )
