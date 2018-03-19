@@ -59,6 +59,19 @@ class TestExecutionAdmin(admin.ModelAdmin):
 class SutAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'credential', 'reserved_by', 'maintained_by')
 
+    def save_model(self, request, sut, form, change):
+        import requests
+        remote = 'http://127.0.0.1:8888'
+        resp = requests.put(
+                f'{remote}/sut/{sut.uuid}',
+                json={
+                    'reserved_by': sut.reserved_by and sut.reserved_by.email,
+                    'maintained_by': sut.maintained_by and sut.maintained_by.email,
+                    },
+                )
+        resp.raise_for_status()
+        super().save_model(request, sut, form, change)
+
 
 @admin.register(ExecLayer)
 class ExecLayerAdmin(admin.ModelAdmin):

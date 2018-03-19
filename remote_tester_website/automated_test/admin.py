@@ -11,12 +11,23 @@ local_site = 'http://127.0.0.1:8000'
 
 @admin.register(ExecLayer)
 class E(admin.ModelAdmin):
-    list_display = ('id', 'ip')
+    list_display = ('id', 'ip', 'port')
 
 
 @admin.register(Sut)
 class S(admin.ModelAdmin):
     list_display = ('uuid', 'exec_layer', 'reserved_by', 'maintained_by')
+
+    def save_model(self, request, sut, form, change):
+        resp = requests.put(
+                f'http://{sut.exec_layer.ip}:{sut.exec_layer.port}/sut/{sut.uuid}',
+                json={
+                    'reserved_by': sut.reserved_by and sut.reserved_by.email,
+                    'maintained_by': sut.maintained_by and sut.maintained_by.email,
+                    },
+                )
+        resp.raise_for_status()
+        super().save_model(request, sut, form, change)
 
 
 @admin.register(TestData)

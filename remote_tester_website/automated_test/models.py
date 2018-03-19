@@ -13,6 +13,7 @@ DEFAULT_TEST_DATA = json.dumps({
 
 class ExecLayer(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4')
+    port = models.PositiveSmallIntegerField(default=80)
 
 
 class Sut(models.Model):
