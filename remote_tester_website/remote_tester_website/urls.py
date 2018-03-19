@@ -16,11 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from automated_test.api import register, unregister, upload_testresult
+from automated_test.api import register, unregister, upload_testresult, SutView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('execlayer/', register),
     path('execlayer/<int:id>', unregister),
     path('testresult/', upload_testresult),
+    path('sut/<uuid:uuid>', SutView.as_view()),
 ]

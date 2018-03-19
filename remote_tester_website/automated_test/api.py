@@ -54,3 +54,27 @@ def upload_testresult(request):
             output=j['output'],
             )
     return HttpResponse()
+
+
+from django.utils.decorators import method_decorator
+from django.views import View
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SutView(View):
+    def get(self, request, uuid):
+        sut = Sut.objects.get(pk=uuid)
+        return JsonResponse({
+                'uuid': sut.uuid,
+                'exec_layer': sut.exec_layer.ip,
+                'credential': sut.credential,
+                'reserved_by': sut.reserved_by and sut.reserved_by.email,
+                'maintained_by': sut.maintained_by and sut.maintained_by.email,
+                })
+
+    def put(self, request, uuid):
+        j = json.loads(request.body)
+        sut = Sut.objects.get(pk=uuid)
+        sut.reserved_by = get_user_or_none_by_email(j['reserved_by'])
+        sut.maintained_by = get_user_or_none_by_email(j['maintained_by'])
+        sut.save(update_fields=['reserved_by', 'maintained_by'])
+        return HttpResponse()

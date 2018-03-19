@@ -36,3 +36,35 @@ def execute_test(request):
 def test_execution(request, rq_jid):
     consoles = ConsoleLine.objects.filter(test_execution_id=rq_jid).order_by('id')
     return HttpResponse(''.join(c.output for c in consoles))
+
+
+from django.utils.decorators import method_decorator
+from django.views import View
+from .models import Sut
+
+def get_user_or_none_by_email(email):
+    from django.contrib.auth.models import User
+    try:
+        return User.objects.get(email=email)
+    except Exception as e:
+        print(e.args)
+        return None
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SutView(View):
+    def get(self, request, uuid):
+        sut = Sut.objects.get(pk=uuid)
+        return JsonResponse({
+                'uuid': sut.uuid,
+                'credential': sut.credential,
+                'reserved_by': sut.reserved_by and sut.reserved_by.email,
+                'maintained_by': sut.maintained_by and sut.maintained_by.email,
+                })
+
+    def put(self, request, uuid):
+        j = json.loads(request.body)
+        sut = Sut.objects.get(pk=uuid)
+        sut.reserved_by = get_user_or_none_by_email(j['reserved_by'])
+        sut.maintained_by = get_user_or_none_by_email(j['maintained_by'])
+        sut.save(update_fields=['reserved_by', 'maintained_by'])
+        return HttpResponse()
