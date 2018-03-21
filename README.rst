@@ -73,8 +73,11 @@ C.  As a remote tester, I want to leverage shared resource to execute automated
     test while managing TD and collecting TR at remote,
     so that get the job done.
 
-Sequence Diagram
-----------------
+D.  As a remote tester, I can run automated provisioning with reserved SUTs
+    so that I can setup SUT remotely.
+
+Diagram
+-------
 
 A.  Local tester execute automated test::
 
@@ -102,6 +105,16 @@ C.  Leverage shared SUTs and execute automated test::
         local -> local: run TE
         note over remote: monitor TE
         local -> remote: generate and upload TR
+
+D.  Setup SUT:
+
+    i.  SUT has OOBM
+    #.  connecting OOBM onto test network
+    #.  TH automatic discover OOBM
+    #.  TH register the OOBM as SUT with default "maintained by" and "reserved by"
+    #.  maintainer release SUT and then remote user reserve SUT
+    #.  create automated provisioning script from test data
+    #.  execute automated provisioning script and update SUTs information
 
 Acceptance Criteria
 -------------------
@@ -196,6 +209,34 @@ B.  Criteria:
     -   [ ] remote user reserve SUTs -> sync to local
     -   [ ] local user reserve SUTs -> sync to remote
 
+D.  Analysis:
+
+    -   OOBM is bound w/ SUT, and OOBM require "SUT management" to auto-discover and control;
+        w/o OOBM, SUT cannot be managed and out of scope
+
+    -   for integrity, SUT must be verified via SUT management while saving (add/edit)
+
+    -   "SUT management" has owner. Its rule is the same as "maitained by"
+
+    -   require "auto-provisioning" based on RF and leverage existing test data to
+        "change" SUT state
+
+    -   SUT information is stored at site database
+
+    -   UUID is the iLO UUID/VM UUID/...; generating UUID if it does not provide (e.g. switch)
+
+    -   still have other information to identify the same SUT for manually added
+
+    -   (enhancement) use typing system in programming to verify SUT information
+
+    -   (enhancement) support handling unknown type of SUT
+
+    -   while register test harness, all SUTs are added to Remote;
+        adding/editing SUTs will sync to Remote if test harness is registered;
+        editing SUTs at Remote will sync to test harness
+
+-   [v] Continuous monitoring test execution
+
 Assumptions
 -----------
 
@@ -214,10 +255,10 @@ Assumptions
 -   reservation cannot set "until" so far, and no one can reserve future
     released SUT, either
 
--   remote tester website have full user accounts.
+-   remote tester website have all user accounts from AD
+
 -   local/remote tester only work at local/remote, i.e. not require TD at both side,
     and local/remote tester will not login to remote/local
--   remote can access local
 
 
 Enhancement
@@ -225,10 +266,24 @@ Enhancement
 
 -   Automatically collecting TR; note that disconnected TAF cannot upload TR,
     and not every TE/TR valuable to be collected
+
 -   As a huge workload tester, I want an overview of my SUTs and Test executions
     so that I can .... ??
+
 -   Handle local disconnect/re-connect to remote. Might use message queue
--   Continuous monitoring test execution
+
+-   As a remote tester, I want to validate TL and resource pool like ISO images
+    before test execution, so that I can ask maintainer for test environment preparation
+
+-   remote user can access local (test harness) to install TL (into system) or download file
+    (related to disk space). It depends on discussion between tester, and is out of scope
+    of the architecture
+
+-   "SUT management" auto-discovery feature
+
+-   SUT status monitoring
+
+-   Test data dry-run to validate itself and test harness
 
 
 Installation and Setup
