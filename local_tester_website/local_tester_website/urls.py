@@ -16,11 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from automated_test.api import execute_test, test_execution, SutView
+from automated_test.api import execute_test, test_execution, SutView, TaasView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('execute_test/', execute_test),
     path('testexecution/<uuid:rq_jid>', test_execution),
     path('sut/<uuid:uuid>', SutView.as_view()),
+    path('taas/', TaasView.as_view()),
 ]

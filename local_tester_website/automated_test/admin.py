@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from .models import TestData, TestExecution, Sut, ExecLayer
+from .models import TestData, TestExecution, Sut, Taas
 from .tasks import execute_test
 
 
@@ -57,23 +57,23 @@ class TestExecutionAdmin(admin.ModelAdmin):
 
 @admin.register(Sut)
 class SutAdmin(admin.ModelAdmin):
-    list_display = ('uuid', 'credential', 'reserved_by', 'maintained_by')
+    list_display = ('uuid', 'info', 'reserved_by', 'maintained_by')
 
     def save_model(self, request, sut, form, change):
-        import requests
-        remote = 'http://127.0.0.1:8888'
-        resp = requests.put(
-                f'{remote}/sut/{sut.uuid}',
-                json={
-                    'reserved_by': sut.reserved_by and sut.reserved_by.email,
-                    'maintained_by': sut.maintained_by and sut.maintained_by.email,
-                    },
-                )
-        resp.raise_for_status()
+        taas = Taas.objects.first()
+        if taas is not None:
+            import requests
+            resp = requests.put(
+                    f'http://{taas.ip}:{taas.port}/sut/{sut.uuid}',
+                    json={
+                        'reserved_by': sut.reserved_by and sut.reserved_by.email,
+                        'maintained_by': sut.maintained_by and sut.maintained_by.email,
+                        },
+                    )
+            resp.raise_for_status()
         super().save_model(request, sut, form, change)
 
 
-@admin.register(ExecLayer)
-class ExecLayerAdmin(admin.ModelAdmin):
-    def has_add_permission(self, request):
-        return False
+@admin.register(Taas)
+class T(admin.ModelAdmin):
+    list_display = ('ip', 'port')

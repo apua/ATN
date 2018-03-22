@@ -90,3 +90,30 @@ class SutView(View):
         sut.maintained_by = get_user_or_none_by_email(j['maintained_by'])
         sut.save(update_fields=['reserved_by', 'maintained_by'])
         return HttpResponse()
+
+
+from .models import Taas
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TaasView(View):
+    def get(self, request):
+        taas = Taas.objects.first()
+        return JsonResponse({'ip': taas.ip, 'port': taas.port}) if taas else JsonResponse({})
+
+    def put(self, request):
+        "For TaaS mark/unmark the test harness registration"
+        j = json.loads(request.body)
+        taas = Taas.objects.first()
+        if taas:
+            if j:
+                # NOTE: consider only one Taas console, thus not reject modification currently
+                taas.ip, taas.port = j['ip'], j['port']
+                taas.save()
+            else:
+                taas.delete()
+        else:
+            if j:
+                Taas.objects.create(**j)
+            else:
+                pass
+        return HttpResponse()

@@ -11,14 +11,14 @@ DEFAULT_TEST_DATA = json.dumps({
     })
 
 
-class ExecLayer(models.Model):
+class TestHarness(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4')
     port = models.PositiveSmallIntegerField(default=80)
 
 
 class Sut(models.Model):
     uuid = models.UUIDField(primary_key=True)
-    exec_layer = models.ForeignKey(ExecLayer, on_delete=models.CASCADE)
+    harness = models.ForeignKey(TestHarness, on_delete=models.CASCADE)
     # TODO: improve OOBM
     type = models.CharField(max_length=64)
     credential = models.CharField(max_length=64)

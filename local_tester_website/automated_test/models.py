@@ -88,6 +88,6 @@ class Sut(models.Model):
             )
 
 
-class ExecLayer(models.Model):
-    uuid = models.UUIDField(primary_key=True)
-    remote = models.GenericIPAddressField(protocol='IPv4')
+class Taas(models.Model):
+    ip = models.GenericIPAddressField(protocol='IPv4')
+    port = models.PositiveSmallIntegerField(default=80)
