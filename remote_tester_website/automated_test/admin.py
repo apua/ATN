@@ -6,8 +6,10 @@ from django.utils.safestring import mark_safe
 from .models import TestHarness, Sut, TestData, TestExecution, TestResult
 
 
-local_site = 'http://127.0.0.1:8000'
-taas_self = {'ip': '127.0.0.1', 'port': 1234}
+#local_site = 'http://127.0.0.1:2345'
+#taas_self = {'ip': '127.0.0.1', 'port': 1234}
+local_site = NotImplemented
+taas_self = NotImplemented
 
 
 @admin.register(TestHarness)
@@ -16,7 +18,15 @@ class H(admin.ModelAdmin):
     actions = None
 
     def save_model(self, request, th, form, change):
-        "Register a test harness onto TaaS itself"
+        """
+        Register a test harness onto TaaS itself
+
+        1.  Verify the test harness is not registered yet
+        2.  Fetch all SUTs from the test harness
+        3.  Label the test harness as registered
+        """
+        from .api import get_user_or_none_by_email
+
         taas = requests.get(f'http://{th.ip}:{th.port}/taas/').json()
         if taas:
             raise Exception(f'Test harness {th.ip}:{th.port} is registered on'
@@ -26,21 +36,26 @@ class H(admin.ModelAdmin):
                 f'http://{th.ip}:{th.port}/taas/',
                 json=taas_self,
                 ).raise_for_status()
-
-        # TODO: dump SUTs and add them onto TaaS, refer to `automated_test.api:register`
+        suts = requests.get(f'http://{th.ip}:{th.port}/sut/').json()
 
         super().save_model(request, th, form, change)
 
+        Sut.load_all(th, suts)
+
     def delete_model(self, request, th):
-        "Unregister a test harness from TaaS itself"
+        """
+        Unregister a test harness from TaaS itself
+
+        1.  Verify the test harness is registered by TaaS itself
+        2.  Remove test harness and SUTs
+        3.  Label the test harness not registered
+        """
         taas = requests.get(f'http://{th.ip}:{th.port}/taas/').json()
         if not taas or taas != taas_self:
             raise Exception(f'Test harness {th.ip}:{th.port} is not'
                             f' register on TaaS {taas_self["ip"]}:{taas_self["port"]} yet')
 
         requests.put(f'http://{th.ip}:{th.port}/taas/', json={}).raise_for_status()
-
-        # TODO: delete SUT instances belong to the test harness, refer to `automated_test.api:unregister`
 
         super().delete_model(request, th)
 
@@ -81,7 +96,6 @@ class T(admin.ModelAdmin):
                 json={"test_data": source, "remote_id": te.id},
                 )
         r.raise_for_status()
-        print(r.json())
         te.rq_jid = r.json()['rq_jid']
         te.save(update_fields=['rq_jid'])
 

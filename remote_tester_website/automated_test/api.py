@@ -9,37 +9,16 @@ from .models import TestHarness, Sut, TestResult
 
 
 def get_user_or_none_by_email(email):
-    from django.contrib.auth.models import User
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    if email is None:
+        return None
     try:
         return User.objects.get(email=email)
     except Exception as e:
         print(e.args)
         return None
-
-
-@csrf_exempt
-@require_POST
-def register(request):
-    print(request.body)
-    j = json.loads(request.body)
-    ex = TestHarness.objects.create(ip=j['ip'])
-    for s in j['suts']:
-        Sut.objects.create(
-                uuid=s['uuid'],
-                harness=ex,
-                reserved_by=get_user_or_none_by_email(s['reserved_by']),
-                maintained_by=get_user_or_none_by_email(s['maintained_by']),
-                )
-    return JsonResponse({'id': ex.id})
-
-
-@csrf_exempt
-@require_http_methods(['DELETE'])
-def unregister(request, id):
-    ex = TestHarness.objects.get(id=id)
-    Sut.objects.filter(harness=ex).delete()
-    ex.delete()
-    return HttpResponse()
 
 
 @csrf_exempt
@@ -73,10 +52,12 @@ class SutView(View):
 
     def put(self, request, uuid):
         j = json.loads(request.body)
-        sut = Sut.objects.get(pk=uuid)
-        sut.reserved_by = get_user_or_none_by_email(j['reserved_by'])
-        sut.maintained_by = get_user_or_none_by_email(j['maintained_by'])
-        sut.save(update_fields=['reserved_by', 'maintained_by'])
+        sut, created = Sut.objects.update_or_create(pk=uuid, defaults={
+                'info': j['info'],
+                'harness': TestHarness.objects.get(**j['harness']),
+                'reserved_by': get_user_or_none_by_email(j['reserved_by']),
+                'maintained_by': get_user_or_none_by_email(j['maintained_by']),
+                })
         return HttpResponse()
 
 
@@ -90,7 +71,8 @@ def test_execution(request, rq_jid):
     return StreamingHttpResponse(
             f'{line}\n'
             for line in get(
-                f'http://127.0.0.1:8000/testexecution/{rq_jid}?{query_string}',
+                NotImplemented,
+                #f'http://127.0.0.1:2345/testexecution/{rq_jid}?{query_string}',
                 stream=True,
                 ).iter_lines(chunk_size=1, decode_unicode=True)
             )

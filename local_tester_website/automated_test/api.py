@@ -80,7 +80,7 @@ class SutView(View):
                 'uuid': sut.uuid,
                 'credential': sut.credential,
                 'reserved_by': sut.reserved_by and sut.reserved_by.email,
-                'maintained_by': sut.maintained_by and sut.maintained_by.email,
+                'maintained_by': sut.maintained_by.email,
                 })
 
     def put(self, request, uuid):
@@ -117,3 +117,7 @@ class TaasView(View):
             else:
                 pass
         return HttpResponse()
+
+@require_GET
+def all_suts(request):
+    return JsonResponse(Sut.dump_all(), safe=False)

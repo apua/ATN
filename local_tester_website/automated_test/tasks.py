@@ -132,7 +132,8 @@ def stop_test_execution(te_pk: "str | UUID"):
 def upload_testreport(rte_id, tr):
     import requests
 
-    remote_site = 'http://127.0.0.1:8888'  # TODO: not hard-code here
+    remote_site = NotImplemented
+    #remote_site = 'http://127.0.0.1:1234'  # TODO: not hard-code here
     assert type(rte_id) is int
     payload = {
             "test_execution_id": rte_id,

@@ -3,12 +3,14 @@ import uuid
 
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 
 DEFAULT_TEST_DATA = json.dumps({
     'filename': 'basic.robot',
     'content': '*** test cases ***\nTC\n  log  message  console=yes\n',
     })
+User = get_user_model()
 
 
 class TestHarness(models.Model):
@@ -19,17 +21,28 @@ class TestHarness(models.Model):
 class Sut(models.Model):
     uuid = models.UUIDField(primary_key=True)
     harness = models.ForeignKey(TestHarness, on_delete=models.CASCADE)
-    # TODO: improve OOBM
-    type = models.CharField(max_length=64)
-    credential = models.CharField(max_length=64)
+    info = models.TextField()
     reserved_by = models.ForeignKey(
-            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+            settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
             related_name='reserved_sut', null=True, blank=True,
             )
     maintained_by = models.ForeignKey(
-            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-            related_name='maintained_sut', null=True,
+            settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+            related_name='maintained_sut',
             )
+
+    @classmethod
+    def load_all(cls, th, suts):
+        cls.objects.bulk_create([
+            cls(
+                uuid=sut['uuid'],
+                info=sut['info'],
+                harness=th,
+                reserved_by=None if sut['reserved_by'] is None else User.objects.get(email=sut['reserved_by']),
+                maintained_by=User.objects.get(email=sut['maintained_by']),
+                )
+            for sut in suts
+            ])
 
 
 class TestData(models.Model):

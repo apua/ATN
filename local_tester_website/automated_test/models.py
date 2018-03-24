@@ -75,19 +75,46 @@ class TestResult(models.Model):
 
 
 class Sut(models.Model):
+    """
+    Info example::
+
+        UUID: 32353537-3036-4E43-3734-353230353447
+        Server Serial Number: CN7452054G
+        Product ID: 755260-AA1
+        Product Name: ProLiant DL360 Gen9
+        IP Address: 10.30.170.120
+        Login Name: administrator
+        Password:
+
+    Maintainer example::
+
+        nancy@hpe.com
+    """
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    type = models.CharField(max_length=64, default='DL380Gen9')
-    credential = models.CharField(max_length=64, default='127.0.0.1:root:password')
+    info = models.TextField()
     reserved_by = models.ForeignKey(
-            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+            settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
             related_name='reserved_sut', null=True, blank=True,
             )
     maintained_by = models.ForeignKey(
-            settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-            related_name='maintained_sut', null=True
+            settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+            related_name='maintained_sut',
             )
+
+    @classmethod
+    def dump_all(cls):
+        return [
+            {
+                'uuid': sut.uuid,
+                'info': sut.info,
+                'reserved_by': None if sut.reserved_by is None else sut.reserved_by.email,
+                'maintained_by': sut.maintained_by.email,
+                }
+            for sut in cls.objects.all()
+            ]
 
 
 class Taas(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4')
     port = models.PositiveSmallIntegerField(default=80)
+    # TODO: limit there is only one instance at most

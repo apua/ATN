@@ -66,6 +66,9 @@ class SutAdmin(admin.ModelAdmin):
             resp = requests.put(
                     f'http://{taas.ip}:{taas.port}/sut/{sut.uuid}',
                     json={
+                        'info': sut.info,
+                        'harness': NotImplemented,
+                        #'harness': {'ip': '127.0.0.1', 'port': 2345},
                         'reserved_by': sut.reserved_by and sut.reserved_by.email,
                         'maintained_by': sut.maintained_by and sut.maintained_by.email,
                         },
