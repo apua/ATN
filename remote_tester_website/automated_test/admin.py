@@ -25,8 +25,6 @@ class H(admin.ModelAdmin):
         2.  Fetch all SUTs from the test harness
         3.  Label the test harness as registered
         """
-        from .api import get_user_or_none_by_email
-
         taas = requests.get(f'http://{th.ip}:{th.port}/taas/').json()
         if taas:
             raise Exception(f'Test harness {th.ip}:{th.port} is registered on'

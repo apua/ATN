@@ -34,12 +34,14 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.contrib.auth import get_user_model
 
 
 DEFAULT_TEST_DATA = json.dumps({
     'filename': 'basic.robot',
     'content': '*** test cases ***\nTC\n  log  message  console=yes\n',
     })
+User = get_user_model()
 
 
 class TestData(models.Model):
@@ -112,6 +114,11 @@ class Sut(models.Model):
                 }
             for sut in cls.objects.all()
             ]
+
+    def update_reservation(self, reserved_by, maintained_by):
+        self.reserved_by = None if reserved_by is None else User.objects.get(email=reserved_by)
+        self.maintained_by = User.objects.get(email=maintained_by)
+        self.save(update_fields=['reserved_by', 'maintained_by'])
 
 
 class Taas(models.Model):

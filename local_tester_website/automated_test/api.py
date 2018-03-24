@@ -64,14 +64,6 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from .models import Sut
 
-def get_user_or_none_by_email(email):
-    from django.contrib.auth.models import User
-    try:
-        return User.objects.get(email=email)
-    except Exception as e:
-        print(e.args)
-        return None
-
 @method_decorator(csrf_exempt, name='dispatch')
 class SutView(View):
     def get(self, request, uuid):
@@ -86,9 +78,7 @@ class SutView(View):
     def put(self, request, uuid):
         j = json.loads(request.body)
         sut = Sut.objects.get(pk=uuid)
-        sut.reserved_by = get_user_or_none_by_email(j['reserved_by'])
-        sut.maintained_by = get_user_or_none_by_email(j['maintained_by'])
-        sut.save(update_fields=['reserved_by', 'maintained_by'])
+        sut.update_reservation(**j)
         return HttpResponse()
 
 

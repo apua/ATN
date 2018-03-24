@@ -8,19 +8,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import TestHarness, Sut, TestResult
 
 
-def get_user_or_none_by_email(email):
-    from django.contrib.auth import get_user_model
-
-    User = get_user_model()
-    if email is None:
-        return None
-    try:
-        return User.objects.get(email=email)
-    except Exception as e:
-        print(e.args)
-        return None
-
-
 @csrf_exempt
 @require_POST
 def upload_testresult(request):
@@ -52,12 +39,7 @@ class SutView(View):
 
     def put(self, request, uuid):
         j = json.loads(request.body)
-        sut, created = Sut.objects.update_or_create(pk=uuid, defaults={
-                'info': j['info'],
-                'harness': TestHarness.objects.get(**j['harness']),
-                'reserved_by': get_user_or_none_by_email(j['reserved_by']),
-                'maintained_by': get_user_or_none_by_email(j['maintained_by']),
-                })
+        sut, created = Sut.update_or_create(j)
         return HttpResponse()
 
 

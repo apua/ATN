@@ -44,6 +44,15 @@ class Sut(models.Model):
             for sut in suts
             ])
 
+    @classmethod
+    def update_or_create(cls, j):
+        sut, created = Sut.objects.update_or_create(pk=uuid, defaults={
+                'info': j['info'],
+                'harness': TestHarness.objects.get(**j['harness']),
+                'reserved_by': None if j['reserved_by'] is None else User.objects.get(email=j['reserved_by']),
+                'maintained_by': User.objects.get(email=j['maintained_by']),
+                })
+
 
 class TestData(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
