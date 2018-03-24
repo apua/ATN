@@ -25,7 +25,14 @@ SECRET_KEY = '985p)%uh2-vbu%sxzsyarckabcyeosc@yz6pl6yk)+dc+8%kt5'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = []
+# NOTE: it's a workaround to get webserver IP:PORT
+import sys
+print(sys.argv)  # expected: ['./manage.py', 'runserver', 'IP:PORT']
+addrport = sys.argv[-1].split(':')
+IP = addrport[0]
+PORT = '80' if len(addrport)==1 else addrport[1]
+ALLOWED_HOSTS = [IP]
 
 
 # Application definition
@@ -129,3 +136,6 @@ ATN = {
     #'TEST_REPORT': os.path.join(MEDIA_ROOT, 'test_report'),
     'WORKSPACE': __import__('pathlib').Path(MEDIA_ROOT) / 'workspace',
 }
+
+CSRF_COOKIE_NAME = f'csrftoken-th{PORT}'
+SESSION_COOKIE_NAME = f'sessionid-th{PORT}'

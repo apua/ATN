@@ -25,7 +25,14 @@ SECRET_KEY = 'm!+y#i35cip&s0st)2-=ox(*qd-n*co1t3shk=io&hx1u9=2vl'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = []
+# NOTE: it's a workaround to get webserver IP:PORT
+import sys
+print(sys.argv)  # expected: ['./manage.py', 'runserver', 'IP:PORT']
+addrport = sys.argv[-1].split(':')
+IP = addrport[0]
+PORT = '80' if len(addrport)==1 else addrport[1]
+ALLOWED_HOSTS = [IP]
 
 
 # Application definition
@@ -119,3 +126,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CSRF_COOKIE_NAME = 'csrftoken-taas'
+SESSION_COOKIE_NAME = f'sessionid-taas'
