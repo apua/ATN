@@ -58,9 +58,9 @@ class H(admin.ModelAdmin):
             raise Exception(f'Test harness {th.ip}:{th.port} is not'
                             f' register on TaaS {settings.IP}:{settings.PORT} yet')
 
-        requests.put(f'http://{th.ip}:{th.port}/taas/', json={}).raise_for_status()
-
         super().delete_model(request, th)
+
+        requests.put(f'http://{th.ip}:{th.port}/taas/', json={}).raise_for_status()
 
 
 @admin.register(Sut)

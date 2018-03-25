@@ -89,19 +89,11 @@ class TaasView(View):
     def put(self, request):
         "For TaaS mark/unmark the test harness registration"
         j = json.loads(request.body)
-        taas = Taas.objects.first()
-        if taas:
-            if j:
-                # NOTE: consider only one Taas console, thus not reject modification currently
-                taas.ip, taas.port = j['ip'], j['port']
-                taas.save()
-            else:
-                taas.delete()
+        if j:
+            taas, created = Taas.objects.update_or_create(defaults=j)
         else:
-            if j:
-                Taas.objects.create(**j)
-            else:
-                pass
+            Taas.objects.all().delete()
+            Sut.objects.filter(reserved_by__is_staff=False).update(reserved_by=None)
         return HttpResponse()
 
 @require_GET
