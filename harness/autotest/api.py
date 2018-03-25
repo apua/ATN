@@ -29,7 +29,8 @@ def execute_test(request):
     source = j['test_data']
     command = f'pybot {source["filename"]}'
     remote_id = j['remote_id']
-    rq_job = tasks.execute_test.delay(td_src=source, cmd=command, rte_id=remote_id)
+    host = j['host']
+    rq_job = tasks.execute_test.delay(td_src=source, cmd=command, rte_id=remote_id, taas=host)
     return JsonResponse({'rq_jid': rq_job.id})
 
 @require_GET

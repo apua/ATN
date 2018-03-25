@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 from .models import TestData, TestExecution, Sut, Taas
 from .tasks import execute_test
@@ -67,8 +68,10 @@ class SutAdmin(admin.ModelAdmin):
                     f'http://{taas.ip}:{taas.port}/sut/{sut.uuid}',
                     json={
                         'info': sut.info,
-                        'harness': NotImplemented,
-                        #'harness': {'ip': '127.0.0.1', 'port': 2345},
+                        'harness': {
+                            'ip': settings.IP,
+                            'port': settings.PORT,
+                            },
                         'reserved_by': sut.reserved_by and sut.reserved_by.email,
                         'maintained_by': sut.maintained_by and sut.maintained_by.email,
                         },

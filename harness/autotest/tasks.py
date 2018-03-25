@@ -129,12 +129,8 @@ def stop_test_execution(te_pk: "str | UUID"):
     os.kill(pid, signal.SIGINT)
 
 
-def upload_testreport(rte_id, tr):
+def upload_testreport(taas, rte_id, tr):
     import requests
-
-    remote_site = NotImplemented
-    #remote_site = 'http://127.0.0.1:1234'  # TODO: not hard-code here
-    assert type(rte_id) is int
     payload = {
             "test_execution_id": rte_id,
             "console": tr.console,
@@ -142,7 +138,7 @@ def upload_testreport(rte_id, tr):
             "log": tr.log,
             "output": tr.output,
             }
-    resp = requests.post(f'{remote_site}/testresult/', json=payload)
+    resp = requests.post(f'{taas}/testresult/', json=payload)
     assert resp.status_code == 200
 
 
@@ -188,7 +184,7 @@ def task(func):
 
 
 @task
-def execute_test(*, td_src=None, cmd=None, td_id=None, rte_id=None):
+def execute_test(*, td_src=None, cmd=None, td_id=None, rte_id=None, taas=None):
     """
     Execute test via subprocess `pybot` and collect test report.
     """
@@ -236,6 +232,6 @@ def execute_test(*, td_src=None, cmd=None, td_id=None, rte_id=None):
             )
 
     if rte_id is not None:
-        upload_testreport(rte_id, tr)
+        upload_testreport(taas, rte_id, tr)
 
     return te.pk, proc.returncode  # return code is defined by `pybot`

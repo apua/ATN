@@ -2,14 +2,13 @@ import requests
 
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 from .models import TestHarness, Sut, TestData, TestExecution, TestResult
 
 
 #local_site = 'http://127.0.0.1:2345'
-#taas_self = {'ip': '127.0.0.1', 'port': 1234}
 local_site = NotImplemented
-taas_self = NotImplemented
 
 
 @admin.register(TestHarness)
@@ -35,7 +34,10 @@ class H(admin.ModelAdmin):
 
         requests.put(
                 f'http://{th.ip}:{th.port}/taas/',
-                json=taas_self,
+                json={
+                    'ip': settings.IP,
+                    'port': settings.PORT,
+                    },
                 ).raise_for_status()
         suts = requests.get(f'http://{th.ip}:{th.port}/sut/').json()
 
@@ -52,9 +54,9 @@ class H(admin.ModelAdmin):
         3.  Label the test harness not registered
         """
         taas = requests.get(f'http://{th.ip}:{th.port}/taas/').json()
-        if not taas or taas != taas_self:
+        if not taas or taas != {'ip': settings.IP, 'port': settings.PORT}:
             raise Exception(f'Test harness {th.ip}:{th.port} is not'
-                            f' register on TaaS {taas_self["ip"]}:{taas_self["port"]} yet')
+                            f' register on TaaS {settings.IP}:{settings.PORT} yet')
 
         requests.put(f'http://{th.ip}:{th.port}/taas/', json={}).raise_for_status()
 
@@ -94,7 +96,11 @@ class T(admin.ModelAdmin):
         te = TestExecution.objects.create(test_data=td, origin=td.test_data)
         r = requests.post(
                 f'{local_site}/execute_test/',
-                json={"test_data": source, "remote_id": te.id},
+                json={
+                    'test_data': source,
+                    'remote_id': te.id,
+                    'host': f'{settings.IP}:{settings.PORT}',
+                    },
                 )
         r.raise_for_status()
         te.rq_jid = r.json()['rq_jid']
