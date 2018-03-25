@@ -25,7 +25,8 @@ class H(admin.ModelAdmin):
 
         1.  Verify the test harness is not registered yet
         2.  Fetch all SUTs from the test harness
-        3.  Label the test harness as registered
+        3.  Mark the test harness as registered
+        4.  Add test harness and SUTs
         """
         taas = requests.get(f'http://{th.ip}:{th.port}/taas/').json()
         if taas:
@@ -51,7 +52,7 @@ class H(admin.ModelAdmin):
 
         1.  Verify the test harness is registered by TaaS itself
         2.  Remove test harness and SUTs
-        3.  Label the test harness not registered
+        3.  Mark the test harness not registered
         """
         taas = requests.get(f'http://{th.ip}:{th.port}/taas/').json()
         if not taas or taas != {'ip': settings.IP, 'port': settings.PORT}:

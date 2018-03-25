@@ -87,7 +87,9 @@ class TaasView(View):
         return JsonResponse({'ip': taas.ip, 'port': taas.port}) if taas else JsonResponse({})
 
     def put(self, request):
-        "For TaaS mark/unmark the test harness registration"
+        """
+        Mark test harness registered/unregistered
+        """
         j = json.loads(request.body)
         if j:
             taas, created = Taas.objects.update_or_create(defaults=j)
