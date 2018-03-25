@@ -48,7 +48,7 @@ class TestData(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     test_data = models.TextField(default=DEFAULT_TEST_DATA)  # TODO: validator
     last_modified = models.DateTimeField(auto_now=True)
-    #refer_to = models.CharField(...)
+    sut = models.ManyToManyField('Sut', blank=True)
 
 
 class TestExecution(models.Model):

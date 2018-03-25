@@ -8,8 +8,12 @@ from .tasks import execute_test
 
 @admin.register(TestData)
 class TestDataAdmin(admin.ModelAdmin):
-    list_display = ('id', 'suite_name', 'author')
+    list_display = ('id', 'suite_name', 'suts', 'author')
     actions = ('execute',)
+
+    def suts(self, td):
+        suts_list = ''.join(f'<li>{s.info.splitlines()[0]}</li>' for s in td.sut.all())
+        return mark_safe(f'<ul>{suts_list}</ul>')
 
     def suite_name(self, td):
         import json
