@@ -28,10 +28,10 @@ DEBUG = True
 #ALLOWED_HOSTS = []
 # NOTE: it's a workaround to get webserver IP:PORT
 import sys
-print(sys.argv)  # expected: ['./manage.py', 'runserver', 'IP:PORT']
+# expected: ['./manage.py', 'runserver', 'IP:PORT']
 addrport = sys.argv[-1].split(':')
 IP = addrport[0]
-PORT = '80' if len(addrport)==1 else addrport[1]
+PORT = 80 if len(addrport)==1 else int(addrport[1])
 ALLOWED_HOSTS = [IP]
 
 
