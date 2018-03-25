@@ -116,7 +116,10 @@ class Sut(models.Model):
             ]
 
     def update_reservation(self, reserved_by, maintained_by):
-        self.reserved_by = None if reserved_by is None else User.objects.get(email=reserved_by)
+        self.reserved_by, created = (None, False) if reserved_by is None else User.objects.get_or_create(
+                email=reserved_by,
+                defaults={'username': reserved_by},
+                )
         self.maintained_by = User.objects.get(email=maintained_by)
         self.save(update_fields=['reserved_by', 'maintained_by'])
 
