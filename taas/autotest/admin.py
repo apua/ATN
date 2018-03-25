@@ -68,7 +68,7 @@ class S(admin.ModelAdmin):
     list_display = ('uuid', 'harness', 'reserved_by', 'maintained_by')
 
     def save_model(self, request, sut, form, change):
-        resp = requests.put(
+        resp = requests.patch(
                 f'http://{sut.harness.ip}:{sut.harness.port}/sut/{sut.uuid}',
                 json={
                     'reserved_by': sut.reserved_by and sut.reserved_by.email,

@@ -71,7 +71,7 @@ class SutView(View):
         sut = Sut.objects.get(pk=uuid)
         return JsonResponse(sut.to_json())
 
-    def put(self, request, uuid):
+    def patch(self, request, uuid):
         j = json.loads(request.body)
         sut = Sut.objects.get(pk=uuid)
         sut.update_reservation(**j)
