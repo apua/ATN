@@ -1,4 +1,4 @@
-"""local_tester_website URL Configuration
+"""taas URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.0/topics/http/urls/
@@ -16,13 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from automated_test.api import execute_test, test_execution, all_suts, SutView, TaasView
+from automated_test.api import upload_testresult, SutView, test_execution
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('execute_test/', execute_test),
-    path('testexecution/<uuid:rq_jid>', test_execution),
-    path('sut/', all_suts),
+    path('testresult/', upload_testresult),
     path('sut/<uuid:uuid>', SutView.as_view()),
-    path('taas/', TaasView.as_view()),
+    path('testexecution/<uuid:rq_jid>', test_execution),
 ]

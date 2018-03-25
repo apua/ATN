@@ -1,5 +1,5 @@
 """
-WSGI config for local_tester_website project.
+WSGI config for taas project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "local_tester_website.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "taas.settings")
 
 application = get_wsgi_application()
