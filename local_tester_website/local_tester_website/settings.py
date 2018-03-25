@@ -137,5 +137,10 @@ ATN = {
     'WORKSPACE': __import__('pathlib').Path(MEDIA_ROOT) / 'workspace',
 }
 
+
 CSRF_COOKIE_NAME = f'csrftoken-th{PORT}'
 SESSION_COOKIE_NAME = f'sessionid-th{PORT}'
+
+from django.contrib.admin.sites import AdminSite
+AdminSite.site_header = f'Test Harness - {IP}:{PORT}'
+AdminSite.index_title = ''

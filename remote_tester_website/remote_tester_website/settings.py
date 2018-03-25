@@ -127,5 +127,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
 CSRF_COOKIE_NAME = 'csrftoken-taas'
 SESSION_COOKIE_NAME = f'sessionid-taas'
+
+from django.contrib.admin.sites import AdminSite
+AdminSite.site_header = 'TaaS Console'
+AdminSite.index_title = ''

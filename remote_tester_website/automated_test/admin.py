@@ -14,8 +14,11 @@ taas_self = NotImplemented
 
 @admin.register(TestHarness)
 class H(admin.ModelAdmin):
-    list_display = ('ip', 'port')
+    list_display = ('ip_port',)
     actions = None
+
+    def ip_port(self, inst):
+        return f'{inst.ip}:{inst.port}'
 
     def save_model(self, request, th, form, change):
         """
