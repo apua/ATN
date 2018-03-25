@@ -120,6 +120,14 @@ class Sut(models.Model):
         self.maintained_by = User.objects.get(email=maintained_by)
         self.save(update_fields=['reserved_by', 'maintained_by'])
 
+    def to_json(self):
+        return {
+                'uuid': self.uuid,
+                'info': self.info,
+                'reserved_by': self.reserved_by and self.reserved_by.email,
+                'maintained_by': self.maintained_by.email,
+                }
+
 
 class Taas(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4')

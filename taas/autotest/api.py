@@ -29,13 +29,7 @@ from django.views import View
 class SutView(View):
     def get(self, request, uuid):
         sut = Sut.objects.get(pk=uuid)
-        return JsonResponse({
-                'uuid': sut.uuid,
-                'harness': sut.harness.ip,
-                'credential': sut.credential,
-                'reserved_by': sut.reserved_by and sut.reserved_by.email,
-                'maintained_by': sut.maintained_by and sut.maintained_by.email,
-                })
+        return JsonResponse(sut.to_json())
 
     def put(self, request, uuid):
         j = json.loads(request.body)

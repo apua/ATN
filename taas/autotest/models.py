@@ -53,6 +53,15 @@ class Sut(models.Model):
                 'maintained_by': User.objects.get(email=j['maintained_by']),
                 })
 
+    def to_json(self):
+        return {
+                'uuid': self.uuid,
+                'harness': self.harness.ip,
+                'info': self.info,
+                'reserved_by': self.reserved_by and self.reserved_by.email,
+                'maintained_by': self.maintained_by and self.maintained_by.email,
+                }
+
 
 class TestData(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
