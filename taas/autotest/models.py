@@ -45,8 +45,8 @@ class Sut(models.Model):
             ])
 
     @classmethod
-    def update_or_create(cls, j):
-        sut, created = Sut.objects.update_or_create(pk=uuid, defaults={
+    def update_or_create(cls, uuid, j):
+        return Sut.objects.update_or_create(pk=uuid, defaults={
                 'info': j['info'],
                 'harness': TestHarness.objects.get(**j['harness']),
                 'reserved_by': None if j['reserved_by'] is None else User.objects.get(email=j['reserved_by']),

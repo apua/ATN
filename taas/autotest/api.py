@@ -33,7 +33,7 @@ class SutView(View):
 
     def put(self, request, uuid):
         j = json.loads(request.body)
-        sut, created = Sut.update_or_create(j)
+        sut, created = Sut.update_or_create(uuid, j)
         return HttpResponse()
 
 
