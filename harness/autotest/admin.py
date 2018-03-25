@@ -33,7 +33,7 @@ class TestDataAdmin(admin.ModelAdmin):
             time.sleep(1)
             te = TestExecution.objects.get(pk=rq_job.id)
             if te:
-                link = f'<a href="/admin/automated_test/testexecution/{rq_job.id}">{te.start}</a>'
+                link = f'<a href="/admin/autotest/testexecution/{rq_job.id}">{te.start}</a>'
                 self.message_user(request, mark_safe(f'Start test execution at: {link}'))
                 break
         else:

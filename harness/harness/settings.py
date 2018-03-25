@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'automated_test.apps.AutomatedTestConfig',
+    'autotest.apps.AutomatedTestConfig',
 ]
 
 MIDDLEWARE = [

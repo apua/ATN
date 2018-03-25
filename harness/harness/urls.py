@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from automated_test.api import execute_test, test_execution, all_suts, SutView, TaasView
+from autotest.api import execute_test, test_execution, all_suts, SutView, TaasView
 
 urlpatterns = [
     path('admin/', admin.site.urls),

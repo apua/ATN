@@ -38,7 +38,7 @@ ALLOWED_HOSTS = [IP]
 # Application definition
 
 INSTALLED_APPS = [
-    'automated_test.apps.AutomatedTestConfig',
+    'autotest.apps.AutomatedTestConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
