@@ -10,4 +10,7 @@ __pycache__/
 # Django development DB
 db.sqlite3
 
+# Django migration files
+migrations/
+
 venv
