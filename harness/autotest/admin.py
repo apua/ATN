@@ -2,26 +2,19 @@ from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 from django.conf import settings
 
-from .models import TestData, TestExecution, Sut, Taas
-from .tasks import execute_test
+from .models import TestData, TestExecution, Sut, Taas, TestResult
 
 
 @admin.register(TestData)
 class TestDataAdmin(admin.ModelAdmin):
-    list_display = ('id', 'suite_name', 'suts', 'author')
+    list_display = ('id', 'related_suts', 'author')
     actions = ('execute',)
 
-    def suts(self, td):
-        suts_list = ''.join(f'<li>{s.info.splitlines()[0]}</li>' for s in td.sut.all())
+    def related_suts(self, td):
+        suts_list = ''.join(f'<li>{s.name}</li>' for s in td.suts.all())
         return mark_safe(f'<ul>{suts_list}</ul>')
 
-    def suite_name(self, td):
-        import json
-
-        return json.loads(td.test_data)['filename']
-
     def execute(self, request, queryset):
-        import json
         import time
 
         if len(queryset) != 1:
@@ -29,9 +22,18 @@ class TestDataAdmin(admin.ModelAdmin):
             return
 
         td = queryset[0]
-        source = json.loads(td.test_data)
-        command = f'pybot {source["filename"]}'
-        rq_job = execute_test.delay(cmd=command, td_src=source, td_id=td.id)
+
+        if not td.is_executable_by(request.user):
+            mesg = (
+                    f'You cannot execute the test data. Possible reasons:'
+                    f' 1. You are not the author of the test data'
+                    f' 2. Required SUTs are not all reserved by you'
+                    f' 3. Required SUTs are in testing'
+                    )
+            self.message_user(request, mesg, level=messages.ERROR)
+            return
+
+        rq_job = td.submit_test_execution()
 
         timeout = 3
         for _ in range(timeout):
@@ -48,21 +50,36 @@ class TestDataAdmin(admin.ModelAdmin):
 @admin.register(TestExecution)
 class TestExecutionAdmin(admin.ModelAdmin):
     actions = None
-    list_display = ('start', 'console', 'origin')
+    list_display = ('start', 'console', 'backup')
     list_display_links = None
+    ordering = ('start',)
 
     def console(self, te):
-        if te.test_result:
-            c = te.test_result.console
+        html_id = f'te-id-{te.rq_jid.hex}'
+        xhr = f'xhr{te.rq_jid.hex}'
+        trs = TestResult.objects.filter(test_execution=te)
+        if trs:
+            return mark_safe(f'<pre id="{html_id}">{trs.first().console}</pre>')
         else:
-            consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
-            c = ''.join(c.output for c in consoles)
-        return mark_safe(f'<pre>{c}</pre>')
+            return mark_safe(f'''
+                    <pre id="{html_id}"></pre>
+                    <script>
+                    var {xhr} = new XMLHttpRequest();
+                    {xhr}.open("GET", "/testexecution/{te.rq_jid}", true);
+                    {xhr}.onreadystatechange = function() {{
+                        var s = document.querySelector("#{html_id}");
+                        if({xhr}.readyState === XMLHttpRequest.LOADING) {{
+                            s.textContent = {xhr}.responseText;
+                        }}
+                    }};
+                    {xhr}.send();
+                    </script>
+                    ''')
 
 
 @admin.register(Sut)
 class SutAdmin(admin.ModelAdmin):
-    list_display = ('uuid', 'info', 'reserved_by', 'maintained_by')
+    list_display = ('uuid', 'name', 'info', 'reserved_by', 'in_use')
 
     def save_model(self, request, sut, form, change):
         taas = Taas.objects.first()

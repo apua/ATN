@@ -37,26 +37,70 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 
-DEFAULT_TEST_DATA = json.dumps({
-    'filename': 'basic.robot',
-    'content': '*** test cases ***\nTC\n  log  message  console=yes\n',
-    })
+DEMO_SUITE = """\
+*** Test Cases ***
+TC
+    log  ${DEMO_VAR}  console=yes
+    log  ${SUTs}      console=yes
+"""
+DEMO_VARIABLES = """\
+DEMO_VAR: demo variable
+"""
 User = get_user_model()
 
 
 class TestData(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    test_data = models.TextField(default=DEFAULT_TEST_DATA)  # TODO: validator
     last_modified = models.DateTimeField(auto_now=True)
-    sut = models.ManyToManyField('Sut', blank=True)
+    suite = models.TextField(default=DEMO_SUITE)
+    vars = models.TextField(default=DEMO_VARIABLES)
+    suts = models.ManyToManyField('Sut', blank=True)
+
+    def is_executable_by(self, user) -> bool:
+        # TODO: define to handle different exceptions
+        return (
+                user == self.author
+                and all(user == sut.reserved_by for sut in self.suts.all())
+                and all(not sut.in_use for sut in self.suts.all())
+                )
+
+    def gen_suts_data(self) -> 'pybot variablefile':
+        return json.dumps({'SUTs': {sut.name: json.loads(sut.info) for sut in self.suts.all()}})
+
+    def gen_pybot_command(self, variable_files=('suts.yaml', 'vars.yaml'), suite='suite.robot'):
+        return f'pybot {" ".join(f"-V {fn}" for fn in variable_files)} {suite}'
+
+    def submit_test_execution(self) -> 'rq_job':
+        from .tasks import execute_test
+        rq_job = execute_test.delay(td_id=self.id)
+        return rq_job
+
+    def backup(self) -> str:
+        return json.dumps({
+            'suite': self.suite,
+            'variables': self.vars,
+            'SUTs': {sut.name: json.loads(sut.info) for sut in self.suts.all()},
+            })
 
 
 class TestExecution(models.Model):
     rq_jid = models.UUIDField(primary_key=True)
     start = models.DateTimeField(auto_now_add=True)
     test_data = models.ForeignKey(TestData, on_delete=models.SET_NULL, null=True)
-    origin = models.TextField(null=True)
+    suts = models.ManyToManyField('Sut', blank=True)
+    backup = models.TextField(null=True)
     pid = models.PositiveSmallIntegerField(null=True)
+
+    def is_job_finished(self) -> bool:
+        from redis import Redis
+        from rq.job import Job
+        from rq.exceptions import NoSuchJobError
+        try:
+            job = Job.fetch(rq_jid, connection=Redis())
+        except NoSuchJobError:
+            return True
+        else:
+            return job.status == 'finished'
 
     def submit(*a, **kw): ...
     def stop(*a, **kw): ...
@@ -76,6 +120,11 @@ class TestResult(models.Model):
     output = models.TextField()
 
 
+def gen_name():
+    from time import time
+    return f'name{int(time())}'
+
+
 class Sut(models.Model):
     """
     Info example::
@@ -93,6 +142,7 @@ class Sut(models.Model):
         nancy@hpe.com
     """
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=256, default=gen_name)
     info = models.TextField()
     reserved_by = models.ForeignKey(
             settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
@@ -102,6 +152,7 @@ class Sut(models.Model):
             settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
             related_name='maintained_sut',
             )
+    in_use = models.BooleanField(default=False)
 
     @classmethod
     def dump_all(cls):

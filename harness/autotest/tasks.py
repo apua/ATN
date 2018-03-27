@@ -187,7 +187,15 @@ def task(func):
 def execute_test(*, td_src=None, cmd=None, td_id=None, rte_id=None, taas=None):
     """
     Execute test via subprocess `pybot` and collect test report.
+
+    E.g.::
+
+        pybot -V suts.yaml -V vars.yaml suite.robot
     """
+    # TODO: require thinking how to seperate multi test execution and models
+    # TODO: may combine it as model method
+    # TODO: may use with statement to garantee teardown
+
     from pathlib import Path
     from uuid import uuid4, UUID
     import subprocess as sp
@@ -201,14 +209,36 @@ def execute_test(*, td_src=None, cmd=None, td_id=None, rte_id=None, taas=None):
 
     if td_id is not None:
         td = TestData.objects.get(pk=td_id)
-        te = TestExecution.objects.create(pk=rq_jid, test_data=td, origin=td.test_data)
+        te = TestExecution.objects.create(
+                pk=rq_jid,
+                test_data=td,
+                backup=td.backup(),
+                )
+        te.suts.set(td.suts.all())
+        te.suts.update(in_use=True)
     else:
         te = TestExecution.objects.create(pk=rq_jid)
 
     workdir = settings.ATN['WORKSPACE'] / str(te.start)
     workdir.mkdir(parents=True)
-    with open(Path(workdir)/td_src['filename'], 'w') as f:
-        f.write(td_src['content'])
+
+    if td_src is None:
+        # New implement
+        td = TestData.objects.get(pk=td_id)
+        with open(Path(workdir)/'suite.robot', 'w') as f: f.write(td.suite)
+        with open(Path(workdir)/'suts.yaml', 'w') as f: f.write(td.gen_suts_data())
+        with open(Path(workdir)/'vars.yaml', 'w') as f: f.write(td.vars)
+    else:
+        # TODO: remove the legacy
+        with open(Path(workdir)/td_src['filename'], 'w') as f:
+            f.write(td_src['content'])
+
+    if cmd is None:
+        # New implement
+        cmd = td.gen_pybot_command()
+    else:
+        # TODO: remove the legacy
+        pass
 
     proc = sp.Popen(cmd, cwd=workdir, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
     te.pid = proc.pid
@@ -221,6 +251,8 @@ def execute_test(*, td_src=None, cmd=None, td_id=None, rte_id=None, taas=None):
     assert outs == b''
     assert errs is None
     assert proc.returncode is not None
+
+    te.suts.update(in_use=False)
 
     consoles = ConsoleLine.objects.filter(test_execution=te).order_by('id')
     tr = TestResult.objects.create(
