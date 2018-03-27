@@ -2,6 +2,37 @@
 Automated Test Network with SUT sharing
 ========================================================
 
+
+2018.03.27:
+
+Have to set time to closure. Re-define functional specs:
+
+- at test harness, auto-discover systems, and show whether available to test or not
+
+- create/edit test data, indicate SUTs, execute test, and report
+
+- reflect SUT information during test execution
+
+- at test harness, support multiple test executions at the same time
+
+- at TaaS console, register/revoke test harness and synchronize SUTs information
+
+- at TaaS console, be able to change reservation only
+
+- monitor test execution
+
+- unit test to garantee multi-task with Django model
+
+- system test to garantee functionality
+
+- validator for API, Form, Models, test suites
+
+- refactor for later maintenance
+
+
+Need to review/update README next.
+
+
 2018.03.14:
 
 Move some text to `misc.rst` and keep only user story, acceptance criteria,
@@ -81,30 +112,35 @@ Diagram
 
 A.  Local tester execute automated test::
 
-        TD -> TD: create and edit TD
-        TD -> TE: execute TD
-        TE -> TE: test execution
-        TE -> TR: generate test result
+        Test Data -> Test Data: create and edit TD
+        Test Data -> Test Execution: execute TD
+        Test Execution -> Test Execution: wait and monitor TE
+        Test Execution -> Test Reporting: report
 
-B.  Register and unregister local site ::
+B.  Register and revoke local site ::
 
-        local -> remote: register by UUID and credential
-        local -> remote: add SUTs to remote and set SUTs reserved by SUT maintainer
+        TaaS Console -> TaaS Console: register with TH credential
+        TaaS Console -> Test Harness: mark TH registered by TaaS
+        Test Harness -> TaaS Console: fetch TH owned SUTs and add to TaaS
 
-        local -> remote: unregister by UUID
-        remote -> local: set SUTs reserved by SUT maintainer and remove SUTs from remote
+        TaaS Console <-> Test Harness: Sync to each other while reservation changed
+
+        TaaS Console -> TaaS Console: revoke TH
+        TaaS Console -> TaaS Console: remove SUTs owned by TH
+        TaaS Console -> Test Harness: mark TH not registered by TaaS
+        Test Harness -> Test Harness: release SUTs reserved by remote users
 
 C.  Leverage shared SUTs and execute automated test::
 
-        local -> local: release SUTs
-        local -> remote: released SUTs auto sync status to remote
-        remote -> remote: reserve SUTs
-        remote -> remote: create and edit TD
-        remote -> remote: execute TD
-        remote -> local: copy TD
-        local -> local: run TE
-        note over remote: monitor TE
-        local -> remote: generate and upload TR
+        TaaS Console -> TaaS Console: create and edit TD
+        TaaS Console -> TaaS Console: execute TD
+        TaaS Console -> Test Harness: submit TE
+
+        TaaS Console <-> Test Harness: wait and monitor TE
+
+        Test Harness -> Test Harness: report
+        Test Harness -> TaaS Console: upload report to TaaS
+
 
 D.  Setup SUT:
 
