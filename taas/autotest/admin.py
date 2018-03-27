@@ -127,7 +127,8 @@ class Te(admin.ModelAdmin):
                     {xhr}.open("GET", "/testexecution/{te.rq_jid}", true);
                     {xhr}.onreadystatechange = function() {{
                         var s = document.querySelector("#{html_id}");
-                        if({xhr}.readyState === XMLHttpRequest.LOADING) {{
+                        if({xhr}.readyState === XMLHttpRequest.LOADING
+                           || {xhr}.readyState === XMLHttpRequest.DONE) {{
                             s.textContent = {xhr}.responseText;
                         }}
                     }};
