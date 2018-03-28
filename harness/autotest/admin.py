@@ -40,7 +40,7 @@ class TestDataAdmin(admin.ModelAdmin):
             time.sleep(1)
             te = TestExecution.objects.get(pk=rq_job.id)
             if te:
-                link = f'<a href="/admin/autotest/testexecution/{rq_job.id}">{te.start}</a>'
+                link = f'<a href="/admin/autotest/testexecution/{rq_job.id}/">{te.start}</a>'
                 self.message_user(request, mark_safe(f'Start test execution at: {link}'))
                 break
         else:
@@ -50,9 +50,13 @@ class TestDataAdmin(admin.ModelAdmin):
 @admin.register(TestExecution)
 class TestExecutionAdmin(admin.ModelAdmin):
     actions = None
-    list_display = ('start', 'console', 'backup')
+    list_display = ('start', 'console', 'report')
     list_display_links = None
-    ordering = ('start',)
+    ordering = ('-start',)
+
+    def report(self, te):
+        if te.test_result:
+            return mark_safe(f'<a href="/test-reporting/{te.pk}/report.html">report</a>')
 
     def console(self, te):
         html_id = f'te-id-{te.rq_jid.hex}'
@@ -65,7 +69,7 @@ class TestExecutionAdmin(admin.ModelAdmin):
                     <pre id="{html_id}"></pre>
                     <script>
                     var {xhr} = new XMLHttpRequest();
-                    {xhr}.open("GET", "/testexecution/{te.rq_jid}", true);
+                    {xhr}.open("GET", "/test-execution/{te.rq_jid}/console/", true);
                     {xhr}.onreadystatechange = function() {{
                         var s = document.querySelector("#{html_id}");
                         if({xhr}.readyState === XMLHttpRequest.LOADING
@@ -87,21 +91,8 @@ class SutAdmin(admin.ModelAdmin):
         if taas is not None:
             import requests
             resp = requests.put(
-                    f'http://{taas.ip}:{taas.port}/sut/{sut.uuid}',
-                    json={
-                        'info': sut.info,
-                        'harness': {
-                            'ip': settings.IP,
-                            'port': settings.PORT,
-                            },
-                        'reserved_by': sut.reserved_by and sut.reserved_by.email,
-                        'maintained_by': sut.maintained_by and sut.maintained_by.email,
-                        },
+                    f'http://{taas}/sut/{sut.uuid}/',
+                    json=sut.to_dict(),
                     )
             resp.raise_for_status()
         super().save_model(request, sut, form, change)
-
-
-@admin.register(Taas)
-class T(admin.ModelAdmin):
-    list_display = ('ip', 'port')

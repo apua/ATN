@@ -65,7 +65,7 @@ class TestData(models.Model):
                 )
 
     def gen_suts_data(self) -> 'pybot variablefile':
-        return json.dumps({'SUTs': {sut.name: json.loads(sut.info) for sut in self.suts.all()}})
+        return json.dumps({'SUTs': {sut.name: sut.info for sut in self.suts.all()}})
 
     def gen_pybot_command(self, variable_files=('suts.yaml', 'vars.yaml'), suite='suite.robot'):
         return f'pybot {" ".join(f"-V {fn}" for fn in variable_files)} {suite}'
@@ -79,7 +79,7 @@ class TestData(models.Model):
         return json.dumps({
             'suite': self.suite,
             'variables': self.vars,
-            'SUTs': {sut.name: json.loads(sut.info) for sut in self.suts.all()},
+            'SUTs': {sut.name: sut.info for sut in self.suts.all()},  # TODO: restrict `sut.info` type
             })
 
 
@@ -119,6 +119,31 @@ class TestResult(models.Model):
     log = models.TextField()
     output = models.TextField()
 
+    def to_dict(self):
+        return {
+                "console": self.console,
+                "report": self.report,
+                "log": self.log,
+                "output": self.output,
+                }
+
+    def upload(self, to_uri):
+        import requests
+        resp = requests.put(to_uri, json=self.to_dict())
+        # TODO: `upload` or say `post script`?
+        # NOTE: it`s a workaround
+        sut_ids = requests.get(to_uri.replace('test-reporting', 'test-execution')).json()['suts']
+        taas = Taas.objects.first()
+        for sid in sut_ids:
+            sut = Sut.objects.get(pk=sid)
+            sut.in_use = False ; sut.save()
+            requests.put(
+                    f'http://{taas}/sut/{sut.uuid}/',
+                    json=sut.to_dict(),
+                    )
+            print(f'sut_uuid -> {sid}')
+        assert resp.status_code == 200
+
 
 def gen_name():
     from time import time
@@ -156,34 +181,34 @@ class Sut(models.Model):
 
     @classmethod
     def dump_all(cls):
-        return [
-            {
-                'uuid': sut.uuid,
-                'info': sut.info,
-                'reserved_by': None if sut.reserved_by is None else sut.reserved_by.email,
-                'maintained_by': sut.maintained_by.email,
-                }
-            for sut in cls.objects.all()
-            ]
+        return [sut.to_dict() for sut in cls.objects.all()]
 
-    def update_reservation(self, reserved_by, maintained_by):
+    def use(self, in_use):
+        self.in_use = in_use
+        self.save(update_fields=['in_use'])
+
+    def reserve(self, reserved_by):
         self.reserved_by, created = (None, False) if reserved_by is None else User.objects.get_or_create(
                 email=reserved_by,
                 defaults={'username': reserved_by},
                 )
-        self.maintained_by = User.objects.get(email=maintained_by)
-        self.save(update_fields=['reserved_by', 'maintained_by'])
+        self.save(update_fields=['reserved_by'])
 
-    def to_json(self):
+    def to_dict(self):
         return {
-                'uuid': self.uuid,
+                'uuid': str(self.uuid),
+                'name': self.name,
                 'info': self.info,
                 'reserved_by': self.reserved_by and self.reserved_by.email,
                 'maintained_by': self.maintained_by.email,
+                'in_use': self.in_use,
                 }
 
 
 class Taas(models.Model):
     ip = models.GenericIPAddressField(protocol='IPv4')
-    port = models.PositiveSmallIntegerField(default=80)
+    port = models.PositiveSmallIntegerField(default=8000)
     # TODO: limit there is only one instance at most
+
+    def __str__(self):
+        return f'{self.ip}:{self.port}'

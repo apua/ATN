@@ -9,11 +9,11 @@ from .models import TestHarness, Sut, TestResult
 
 
 @csrf_exempt
-@require_POST
-def upload_testresult(request):
+@require_http_methods(['PUT'])
+def upload_test_reporting(request, te_id):
     j = json.loads(request.body)
     TestResult.objects.create(
-            test_execution_id=j['test_execution_id'],
+            test_execution_id=te_id,
             console=j['console'],
             report=j['report'],
             log=j['log'],
@@ -33,7 +33,7 @@ class SutView(View):
 
     def put(self, request, uuid):
         j = json.loads(request.body)
-        sut, created = Sut.update_or_create(uuid, j)
+        Sut.update_or_create(uuid, j)
         return HttpResponse()
 
 
@@ -41,14 +41,34 @@ from django.views.decorators.http import require_GET
 from django.http import StreamingHttpResponse
 
 @require_GET
+def detail_test_execution(request, te_id):
+    from .models import TestExecution
+    return JsonResponse(TestExecution.objects.get(pk=te_id).to_dict())
+
+@require_GET
 def test_execution(request, rq_jid):
-    from requests import get
+    import requests
+    from .models import TestExecution
     query_string = request.META['QUERY_STRING']
-    return StreamingHttpResponse(
-            f'{line}\n'
-            for line in get(
-                NotImplemented,
-                #f'http://127.0.0.1:2345/testexecution/{rq_jid}?{query_string}',
+    if not TestExecution.objects.get(rq_jid=rq_jid).suts.exists(): return HttpResponse()  # TODO: legacy
+    harness = TestExecution.objects.get(rq_jid=rq_jid).suts.first().harness
+    r = requests.get(
+                f'http://{harness}/test-execution/{rq_jid}/console/',
                 stream=True,
-                ).iter_lines(chunk_size=1, decode_unicode=True)
+                )
+    try:
+        r.raise_for_status()
+    except:
+        return HttpResponse()
+    else:
+        return StreamingHttpResponse(
+            f'{line}\n'
+            for line in r.iter_lines(chunk_size=1, decode_unicode=True)
             )
+
+
+@require_GET
+def test_report_page(requests, te_id, name):
+    from .models import TestExecution, TestResult
+    tr = TestExecution.objects.get(pk=te_id).test_result
+    return HttpResponse(getattr(tr, name))

@@ -31,7 +31,7 @@ import sys
 # expected: ['./manage.py', 'runserver', 'IP:PORT']
 addrport = sys.argv[-1].split(':')
 IP = addrport[0]
-PORT = 80 if len(addrport)==1 else int(addrport[1])
+PORT = 8000 if len(addrport)==1 else int(addrport[1])
 ALLOWED_HOSTS = [IP]
 
 

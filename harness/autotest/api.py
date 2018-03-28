@@ -26,15 +26,16 @@ from . models import ConsoleLine
 @require_POST
 def execute_test(request):
     j = json.loads(request.body)
-    source = j['test_data']
-    command = f'pybot {source["filename"]}'
-    remote_id = j['remote_id']
-    host = j['host']
-    rq_job = tasks.execute_test.delay(td_src=source, cmd=command, rte_id=remote_id, taas=host)
+    #source = j['test_data']
+    #command = f'pybot {source["filename"]}'
+    #remote_id = j['remote_id']
+    #host = j['host']
+    #rq_job = tasks.execute_test.delay(td_src=source, cmd=command, rte_id=remote_id, taas=host)
+    rq_job = tasks.execute_test.delay(td_dict=j)
     return JsonResponse({'rq_jid': rq_job.id})
 
 @require_GET
-def test_execution(request, rq_jid):
+def monitor_test_execution(request, rq_jid):
     from .models import TestExecution, TestResult
     from time import sleep
 
@@ -65,18 +66,24 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from .models import Sut
 
-@method_decorator(csrf_exempt, name='dispatch')
-class SutView(View):
-    def get(self, request, uuid):
-        sut = Sut.objects.get(pk=uuid)
-        return JsonResponse(sut.to_json())
+@require_GET
+def detail_sut(request, uuid):
+    sut = Sut.objects.get(pk=uuid)
+    return JsonResponse(sut.to_dict())
 
-    def patch(self, request, uuid):
-        j = json.loads(request.body)
-        sut = Sut.objects.get(pk=uuid)
-        sut.update_reservation(**j)
-        return HttpResponse()
+@csrf_exempt
+@require_POST
+def reserve_sut(request, uuid):
+    j = json.loads(request.body)
+    Sut.objects.get(pk=uuid).reserve(j['reserved_by'])
+    return HttpResponse()
 
+@csrf_exempt
+@require_POST
+def use_sut(request, uuid):
+    j = json.loads(request.body)
+    Sut.objects.get(pk=uuid).use(j['in_use'])
+    return HttpResponse()
 
 from .models import Taas
 
@@ -99,5 +106,12 @@ class TaasView(View):
         return HttpResponse()
 
 @require_GET
-def all_suts(request):
+def list_suts(request):
     return JsonResponse(Sut.dump_all(), safe=False)
+
+
+@require_GET
+def test_report_page(requests, te_id, name):
+    from .models import TestExecution, TestResult
+    tr = TestExecution.objects.get(pk=te_id).test_result
+    return HttpResponse(getattr(tr, name))

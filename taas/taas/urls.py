@@ -16,11 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from autotest.api import upload_testresult, SutView, test_execution
+from autotest.api import SutView, test_execution, upload_test_reporting, test_report_page, detail_test_execution
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('testresult/', upload_testresult),
-    path('sut/<uuid:uuid>', SutView.as_view()),
-    path('testexecution/<uuid:rq_jid>', test_execution),
+    path('sut/<uuid:uuid>/', SutView.as_view()),
+    path('test-execution/<uuid:rq_jid>/console/', test_execution),
+    path('test-execution/<int:te_id>/', detail_test_execution),
+    path('test-reporting/<int:te_id>/', upload_test_reporting),
+    path('test-reporting/<int:te_id>/<name>.html', test_report_page),
 ]

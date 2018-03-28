@@ -66,15 +66,17 @@ class H(admin.ModelAdmin):
 
 @admin.register(Sut)
 class S(admin.ModelAdmin):
-    list_display = ('uuid', 'harness', 'reserved_by', 'maintained_by')
+    list_display = ('uuid', 'name', 'harness', 'reserved_by', 'in_use')
 
     def save_model(self, request, sut, form, change):
-        resp = requests.patch(
-                f'http://{sut.harness.ip}:{sut.harness.port}/sut/{sut.uuid}',
-                json={
-                    'reserved_by': sut.reserved_by and sut.reserved_by.email,
-                    'maintained_by': sut.maintained_by and sut.maintained_by.email,
-                    },
+        resp = requests.post(
+                f'http://{sut.harness}/sut/{sut.uuid}/reserve/',
+                json={'reserved_by': sut.reserved_by and sut.reserved_by.email},
+                )
+        resp.raise_for_status()
+        resp = requests.post(
+                f'http://{sut.harness}/sut/{sut.uuid}/use/',
+                json={'in_use': sut.in_use},
                 )
         resp.raise_for_status()
         super().save_model(request, sut, form, change)
@@ -82,7 +84,12 @@ class S(admin.ModelAdmin):
 
 @admin.register(TestData)
 class T(admin.ModelAdmin):
+    list_display = ('id', 'related_suts', 'author')
     actions = ('execute',)
+
+    def related_suts(self, td):
+        suts_list = ''.join(f'<li>{s.name}</li>' for s in td.suts.all())
+        return mark_safe(f'<ul>{suts_list}</ul>')
 
     def execute(self, request, queryset):
         import json
@@ -93,30 +100,33 @@ class T(admin.ModelAdmin):
             return
 
         td = queryset[0]
-        source = json.loads(td.test_data)
-        te = TestExecution.objects.create(test_data=td, origin=td.test_data)
-        r = requests.post(
-                f'{local_site}/execute_test/',
-                json={
-                    'test_data': source,
-                    'remote_id': te.id,
-                    'host': f'{settings.IP}:{settings.PORT}',
-                    },
-                )
-        r.raise_for_status()
-        te.rq_jid = r.json()['rq_jid']
-        te.save(update_fields=['rq_jid'])
+        if not td.is_executable_by(request.user):
+            mesg = (
+                    f'You cannot execute the test data. Possible reasons:'
+                    f' 1. You are not the author of the test data'
+                    f' 2. Required SUTs are not all reserved by you'
+                    f' 3. Required SUTs are in testing'
+                    )
+            self.message_user(request, mesg, level=messages.ERROR)
+            return
+
+        rq_jid = td.submit_test_execution()
 
 
 @admin.register(TestExecution)
 class Te(admin.ModelAdmin):
     actions = None
-    list_display = ('id', 'rq_jid', 'start', 'console', 'origin')
+    list_display = ('id', 'rq_jid', 'start', 'console', 'report')
+
+    def report(self, te):
+        if te.test_result:
+            return mark_safe(f'<a href="/test-reporting/{te.pk}/report.html">report</a>')
 
     def console(self, te):
+        if te.rq_jid is None: print("te.rq_jid is None"); return  # TODO: remove it
         html_id = f'te-id-{te.id}'
         xhr = f'xhr{te.id}'
-        trs = TestResult.objects.filter(test_execution=te)
+        trs = TestResult.objects.filter(test_execution=te)  # TODO: better way like `get`?
         if trs:
             return mark_safe(f'<pre id="{html_id}">{trs.first().console}</pre>')
         else:
@@ -124,7 +134,7 @@ class Te(admin.ModelAdmin):
                     <pre id="{html_id}"></pre>
                     <script>
                     var {xhr} = new XMLHttpRequest();
-                    {xhr}.open("GET", "/testexecution/{te.rq_jid}", true);
+                    {xhr}.open("GET", "/test-execution/{te.rq_jid}/console/", true);
                     {xhr}.onreadystatechange = function() {{
                         var s = document.querySelector("#{html_id}");
                         if({xhr}.readyState === XMLHttpRequest.LOADING
