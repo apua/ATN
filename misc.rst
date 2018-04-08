@@ -1,3 +1,42 @@
+2018.03.27:
+
+Have to set time to closure. Re-define functional specs:
+
+- at test harness, auto-discover systems, and show whether available to test or not
+
+- create/edit test data, indicate SUTs, execute test, and report
+
+- reflect SUT information during test execution
+
+- at test harness, support multiple test executions at the same time
+
+- at TaaS console, register/revoke test harness and synchronize SUTs information
+
+- at TaaS console, be able to change reservation only
+
+- monitor test execution
+
+- unit test to garantee multi-task with Django model
+
+- system test to garantee functionality
+
+- validator for API, Form, Models, test suites
+
+- refactor for later maintenance
+
+
+Need to review/update README next.
+
+
+2018.03.14:
+
+Move some text to `misc.rst` and keep only user story, acceptance criteria,
+and so on, which are necessary for development.
+
+Merge `local` branch that have partial implement, and review criteria.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Development flow
 ================
 
