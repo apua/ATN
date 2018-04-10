@@ -1,3 +1,11 @@
+2018.04.05:
+
+The 2nd POC is going to be closed.
+
+In addition to review the current stage, there is also the next goal below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 2018.03.27:
 
 Have to set time to closure. Re-define functional specs:

@@ -2,45 +2,105 @@
 Automated Test Network
 ======================
 
-2018.04.05:
+-   ATN designs for integration of whole `test process`
+    including "plan", "design", "exec", and "report".
 
-The 2nd POC is going to be closed.
+-   ATN benefits to `share resources`, for example, `test objects` and `test data`.
 
-In addition to review the current stage, there is also the next goal below.
+-   ATN considers `Test as a Serivices` providing a platform for test planning,
+    `test data` design, *remote test execution*, and reporting.
+
+-   ATN is composed of `TaaS console`, `TaaS storage`, and a few enhanced `test harnesses`.
+
+-   Enhanced `test harnesses` wrap `test automation framework` with job queue
+    for *parallel test executions*, and provide *REST API* for collaboration with other system.
+
+-   `Automated provisioning` is considered as part of `test data` in ATN.
+
+-   System under test is considered a member of `system relation hierarchy` in ATN.
+
+It is just a basic implementation for advanced feature implementation,
+for example, automated test resource allocation, in the future.
 
 
 Glossary
 ========
 
-+------+-------------------------------------------------------------+
-| Term | Description                                                 |
-+======+=============================================================+
-| SUT  | system under test, e.g. HPE DL380Gen10, VMware ESXi         |
-+------+-------------------------------------------------------------+
-| TD   | test data, including test cases, variables, test libraries, |
-|      | test drivers, and auto provisioning scripts                 |
-+------+-------------------------------------------------------------+
-| TE   | test execution                                              |
-+------+-------------------------------------------------------------+
-| TR   | test result, including test report and log,                 |
-|      | providing full information about the result of TE           |
-+------+-------------------------------------------------------------+
-| TAF  | test automation framework                                   |
-+------+-------------------------------------------------------------+
-| ATN  | automated test network, the network present in this demo    |
-+------+-------------------------------------------------------------+
++--------------+------------------------+
+| Abbreviation | Stands for             |
++==============+========================+
+| SUT          | System Under Test      |
++--------------+------------------------+
+| TD           | Test Data              |
++--------------+------------------------+
+| TE           | Test Execution         |
++--------------+------------------------+
+| TR           | Test Report            |
++--------------+------------------------+
+| TH           | Test Harness           |
++--------------+------------------------+
+| TaaS         | Test as a Service      |
++--------------+------------------------+
+| ATN          | Automated Test Network |
++--------------+------------------------+
 
-+------------------+------------------------------------------------------------+
-| Role             | Desciption                                                 |
-+==================+============================================================+
-| local tester     | a tester who work at private test network                  |
-+------------------+------------------------------------------------------------+
-| remote tester    | a tester who work at public network                        |
-+------------------+------------------------------------------------------------+
-| SUT maintainer   | a tester who maintain a SUT, is who add the SUT in general |
-+------------------+------------------------------------------------------------+
-| local site admin | a tester who manage a local site, is one of local tester   |
-+------------------+------------------------------------------------------------+
++-------------------+-------------------------------------------------------------+
+| Term              | Description                                                 |
++===================+=============================================================+
+| system under test | The component or system to be tested. It could be a server, |
+|                   | switch, VM, container, and so on.                           |
++-------------------+-------------------------------------------------------------+
+| test object       | i.e. system under test.                                     |
++-------------------+-------------------------------------------------------------+
+| test data         | Compresses test cases, variables, test libraries,           |
+|                   | test drivers, and auto provisioning scripts.                |
++-------------------+-------------------------------------------------------------+
+| test report       | A document summarizing testing activities and results,      |
+|                   | produced at regular intervals, to report progress of        |
+|                   | testing activities against a baseline (such as the          |
+|                   | original test plan) and to communicate risks and            |
+|                   | alternatives requiring a decision to management.            |
++-------------------+-------------------------------------------------------------+
+| test environment  | An environment containing hardware, instrumentation,        |
+|                   | simulators, software tools, and other support elements      |
+|                   | needed to conduct a test.                                   |
++-------------------+-------------------------------------------------------------+
+| test harness      | A test environment comprised of stubs and drivers needed to |
+|                   | execute a test.                                             |
++-------------------+-------------------------------------------------------------+
+| test process      | The fundamental test process comprises test planning and    |
+|                   | control, test analysis and design, test implementation and  |
+|                   | execution, evaluating exit criteria and reporting, and test |
+|                   | closure activities.                                         |
++-------------------+-------------------------------------------------------------+
+| test as a service | An outsourcing model in which testing activities are        |
+|                   | performed by a service provider rather than self.           |
++-------------------+-------------------------------------------------------------+
+| TaaS console      | The web client of TaaS.                                     |
++-------------------+-------------------------------------------------------------+
+| TaaS storage      | The test resource storage collecting test data and reports. |
++-------------------+-------------------------------------------------------------+
+
+Roles and Responsibilities:
+
++---------------+------------------------------------------------------------+
+| Role          | Resposibility                                              |
++===============+============================================================+
+| tester        | A skilled professional who is involved in the testing of   |
+|               | a component or system.                                     |
++---------------+------------------------------------------------------------+
+| test manager  | The person responsible for project management of           |
+|               | testing activities and resources, and evaluation of a SUT. |
+|               | The individual who directs, controls, administers, plans   |
+|               | and regulates the evaluation of a SUT.                     |
++---------------+------------------------------------------------------------+
+| test director | A senior manager who manages test managers.                |
++---------------+------------------------------------------------------------+
+| local tester  | A tester works at local test environment who also          |
+|               | responses for SUTs maintenance.                            |
++---------------+------------------------------------------------------------+
+| remote tester | A tester not works at local test environment.              |
++---------------+------------------------------------------------------------+
 
 Reference: `ISTQB Glossary All Terms`_
 
@@ -51,29 +111,41 @@ Reference: `ISTQB Glossary All Terms`_
 User stories
 ============
 
-Epic story
-----------
+Epic
+----
 
-Provide a network based on test automation architecture, i.e. ATN,
-which chain and share SUT/test harness/test automation framework/test result,
-so that reduce redundant test resource and collect test result automatically.
+As a `test director`,
+I want an infrastructure, say automated test network (`ATN`), which integrate `test process` by
+sharing `test data`, `test objects`, `test environments`, and collecting `test reports`,
+so that accelerating test automation and reduce redundant test resources.
 
 Stories
 -------
 
-A.  As a local tester, I want to manage TD/submit TE/generate TR at LAN,
-    so that I can run automated test to get the job done as usual.
+As a `test manager`,
 
-B.  As a local tester, I can register my local tester website, a test automation
-    framework, onto remote tester website, with access control, so that
-    I can share resource with other tester and not interrupt my scheduled job.
+-   I want a service with user interface, to manage and share `test data`.
+-   I want a service with user interface which stores `test reports`, to manage and analyze `test reports`.
 
-C.  As a remote tester, I want to leverage shared resource to execute automated
-    test while managing TD and collecting TR at remote,
-    so that get the job done.
+As a `local tester`,
 
-D.  As a remote tester, I can run automated provisioning with reserved SUTs
-    so that I can setup SUT remotely.
+-   I need a user interface on my `test harness`, to fetch/import `test data` via `ATN` for test execution.
+-   I need a user interface on my `test harness`, to execute automated test for test execution.
+-   I need a user interface on the service where `test manager` work on, to upload `test report` for test reporting.
+-   I want `test harness` supports parallel test executions, so that accelerating test executions.
+-   I want `test harness` supports `SUTs` reservation to deny other `testers` change states of those `SUTs`,
+    so that avoiding someone interrupt my test execution.
+-   I want `test harness` determines a system is either under test (`SUT`) or a part of `test environment`
+    and restrict their usage automatically, so that I won't break `test environments`.
+-   I need a user interface on the service where `remote tester` work on, to provide/remove my `test harness` information,
+    so that other `testers` can leverage the shared `SUTs` and `test environments`.
+
+As a `remote tester`,
+
+-   I need a service with user interface to fetch `test data`, leverage `SUTs` and `test environments` to execute test,
+    and upload `test report` for `test process`.
+-   I want the service (as above) supports `SUTs` reservation to deny other `testers` change states of those `SUTs`,
+    so that avoiding someone interrupt my test execution.
 
 Assumptions
 -----------
