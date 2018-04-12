@@ -137,8 +137,7 @@ As a `local tester`,
     so that avoiding someone interrupt my test execution.
 -   I want `test harness` determines a system is either under test (`SUT`) or a part of `test environment`
     and restrict their usage automatically, so that I won't break `test environments`.
--   I need a user interface on the service where `remote tester` work on, to provide/remove my `test harness` information,
-    so that other `testers` can leverage the shared `SUTs` and `test environments`.
+-   I need a solution for sharing `SUTs` and `test environments`.
 
 As a `remote tester`,
 
@@ -162,7 +161,10 @@ Assumptions
 Solution
 --------
 
-.. 
+-   Provide `TaaS storage` which stores `test data` and `test reports` in corp-net.
+-   Provide `TaaS console` which provides user interface for `test process` cooperating with `TaaS storage` in corp-net.
+-   Enhance `test harnesses` to provide user interface to fulfill requirements comes from `local testers`.
+-   `TaaS storage`, `TaaS console`, and enhanced `test harnesses` communicate with REST style API via HTTP(S); each of them is working software based on microservices architecture.
 
 Enhancement
 -----------
@@ -191,128 +193,6 @@ Test design:
 
 -   As a `test manager`, I want enhanced test automation framework which is typed, so that creating more reliable test cases of `test data`.
 -   As a `test manager`, I want enhanced dry-run feature on `TaaS console`, so that creating more reliable variables of `test data`.
-
-
-Acceptance Criteria
--------------------
-
-A.  -   [v] user roles: tester, administrator
-
-    -   [v] register SUTs where "reserved_by" is me, "maintained_by" is me
-
-    -   [v] SUT: one cannot change "reserved_by" from me, but I can
-
-    -   [v] SUT: one cannot change "maintained_by" from me, but I can
-
-    -   [v] SUT: always has maintainer, but may no one reserves it
-        (i.e. "maintained_by" cannot be blank, but "reserved_by" can be)
-
-    -   [v] I can create TD where
-
-        -   author (me)
-
-        -   last modified
-
-        -   optional "refer_to" to indicate the test plan written by SME
-
-        -   suites:
-
-            -   TC
-            -   variables (including ISO images)
-            -   keywords
-            -   TL
-            -   TR (including variables, keywords, TL)
-
-    -   [v] anyone can copy from my TD
-
-    -   [v] I can only execute my TD with SUTs I reserved
-
-    -   [ ] test execution will fetch ISO/TL/TR automatically
-
-    -   [v] I can search TE by "start" and "tester" is me
-
-    -   [v] TE are read-only
-
-    -   [v] I can get TE console, the original TD source
-
-    -   [v] I can modify TD, even if it has been executed before
-
-    -   [v] I can get TR by TE start, including console, report.html, log.html,
-        output.xml
-
-    Enhancement:
-
-    -   [ ] I can list my SUTs only
-
-    -   [ ] I can list my TD only
-
-    -   [ ] I can search TD
-
-        - "refer_to"
-        - suites name
-
-    -   [ ] I can get TE status (running/finished), TD which executed with, TR
-
-    -   [ ] I can get TR where html/xml is in iframe
-
-B.  Criteria:
-
-    -   local user work as usal
-    -   remote user leverage shared SUT to execute test
-    -   local user can register local site
-    -   all TE/TR collected to remote
-    -   local and remote get synchronous SUT sharing status
-    -   remote can edit TD
-    -   role: tester, administrator
-
-    Spec:
-
-    -   [v] test harness: UUID, IP
-    -   [v] user identification: UUID, email
-    -   [v] SUT: UUID, identification (type, credential), maintained_by, reserved_by, under
-    -   [v] TD (remote): ID, ...
-    -   [v] TD (local): ID, ...
-    -   [v] TE (local): UUID, RQ job ID, TD, origin TD, ...
-    -   [v] TE (remote): UUID, origin TD, local_done (Bool)
-    -   [v] TR
-
-    -   [v] execute TD -> TD owner? -> SUT reserved? -> SUTs on the same TH?
-        -> cache TD at local -> remote check TE finished manually
-        -> local TE is finished -> local upload TE/TR to remote
-
-    -   [v] register TH -> fix user identification -> add SUTs infomation by UUID
-        -> upload TE/TR by UUID
-
-    -   [v] remote user reserve SUTs -> sync to local
-    -   [v] local user reserve SUTs -> sync to remote
-
-D.  Analysis:
-
-    -   OOBM is bound w/ SUT, and OOBM require "SUT management" to auto-discover and control;
-        w/o OOBM, SUT cannot be managed and out of scope
-
-    -   for integrity, SUT must be verified via SUT management while saving (add/edit)
-
-    -   "SUT management" has owner. Its rule is the same as "maitained by"
-
-    -   require "auto-provisioning" based on RF and leverage existing test data to
-        "change" SUT state
-
-    -   SUT information is stored at site database
-
-    -   UUID is the iLO UUID/VM UUID/...; generating UUID if it does not provide (e.g. switch)
-
-    -   still have other information to identify the same SUT for manually added
-
-    -   (enhancement) use typing system in programming to verify SUT information
-
-    -   (enhancement) support handling unknown type of SUT
-
-    -   while register test harness, all SUTs are added to Remote;
-        adding/editing SUTs will sync to Remote if test harness is registered;
-        editing SUTs at Remote will sync to test harness
-
--   [v] Continuous monitoring test execution
 
 
 Implementation
