@@ -8,12 +8,12 @@ Automated Test Network
 -   ATN benefits to `share resources`_, for example, `test objects`_ and `test data`_.
 
 -   ATN considers `Test as a Service`_ providing a platform for test planning,
-    `test data`_ design, *remote test execution*, and reporting.
+    `test data`_ design, *remote* `test execution`_, and reporting.
 
 -   ATN is composed of `TaaS console`_, `TaaS storage`_, and a few enhanced `test harnesses`_.
 
 -   Enhanced `test harnesses`_ wrap `test automation framework`_ with job queue
-    for *parallel test executions*, and provide *REST API* for collaboration with other system.
+    for *parallel* `test executions`_, and provide *REST API* for collaboration with other system.
 
 -   `Automated provisioning`_ is considered as part of `test data`_ in ATN.
 
@@ -26,6 +26,7 @@ for example, automated test resource allocation, in the future.
 .. _test automation framework:
 .. _automated provisioning:
 .. _system relation hierarchy:
+.. _test executions: `test execution`_
 
 
 Glossary
@@ -38,7 +39,7 @@ Glossary
 +--------------+---------------------------+
 | _`TD`        | `Test Data`_              |
 +--------------+---------------------------+
-| _`TE`        | Test Execution            |
+| _`TE`        | `Test Execution`_         |
 +--------------+---------------------------+
 | _`TR`        | `Test Report`_            |
 +--------------+---------------------------+
@@ -79,6 +80,9 @@ Glossary
 |                      | control, test analysis and design, test implementation and     |
 |                      | execution, evaluating exit criteria and reporting, and test    |
 |                      | closure activities.                                            |
++----------------------+----------------------------------------------------------------+
+| _`test execution`    | The process of running a test on the component or              |
+|                      | `system under test`_, producing actual result(s)               |
 +----------------------+----------------------------------------------------------------+
 | _`test as a service` | An outsourcing model in which testing activities are           |
 |                      | performed by a service provider rather than self.              |
