@@ -150,25 +150,48 @@ As a `remote tester`,
 Assumptions
 -----------
 
--   assume RQ worker is enough to run test execution immediately (in fact,
-    developer can take # of RQ workers as many as # of SUTs)
+-   `Test directors` and `test managers` work at the same network in the corporation, say "corp-net".
+-   Every `local tester` works in a private network of a laboratory, say "lab-net".
+-   `Remote testers` work in either corp-net or their own lab-net.
+-   Every system, either under test or not, has owner (or say, maintainer).
+-   There is AD server in corp-net contains all user account based on Email.
+-   Every `test harness` is connected to a lab-net, but might not be connected to corp-net yet, according to its maintainers (i.e. `local testers`).
+-   While an automated test is submitted, it shall be executed immediately.
+-   Every reservation has no dead line, in other word, there is no "until" field to declare when will the `SUTs` and `test environments` be released.
 
--   there may be more than one local tester
+Solution
+--------
 
--   test harness has public IP, or the gateway has been set port forwarding (
-    i.e. remote can access local site)
+.. 
 
--   test harness can take additional port for REST API
+Enhancement
+-----------
 
--   every SUTs has maintainer, but may no one reserve it
+Logging:
 
--   reservation cannot set "until" so far, and no one can reserve future
-    released SUT, either
+-   As a `test manager`, I want to log automated test steps to analyze, so that I can measure and predict automated test duration.
+-   As a `test manager`, I want to log reservation to analyze, so that I can measure and predict reservation duration and manage resource accurately.
 
--   remote tester website have all user accounts from AD
+Test execution:
 
--   local/remote tester only work at local/remote, i.e. not require TD at both side,
-    and local/remote tester will not login to remote/local
+-   As a `tester`, I want a service caching large files of `test data`, e.g. ISO images, such service has user interface, so that I can accelerate my test execution.
+
+`SUTs` management:
+
+-   As a `local tester`, I want auto-discovery tools based on different OOBM of systems, such auto-discovery tools will add systems onto `test harness` automatically, so that I don't register systems onto `test harness` manually and reduce human errors.
+-   As a `local tester`, I want an integrated `SUTs` management dashboard (i.e. system management), so that I can monitor laboratory resources in one sight.
+
+Network:
+
+-   As a `local tester`, sometimes it is impossible to connect `test harness` to corp-net (there is gateway at least), it requires a solution to make `test harness` become a part of ATN, so that sharing `SUTs` and `test environments`.
+-   As a `remote tester`, it requires solution like disconnect/re-connect handler, so that it covers unstable or high-latency network connection between `test harness` and ATN.
+-   As a `test manager`, while working in geographically different network, e.g. Houston/Bangalore/Taipei, I want a "local" `TaaS console`, so that I can operate `TaaS console` smoothly.
+
+Test design:
+
+-   As a `test manager`, I want enhanced test automation framework which is typed, so that creating more reliable test cases of `test data`.
+-   As a `test manager`, I want enhanced dry-run feature on `TaaS console`, so that creating more reliable variables of `test data`.
+
 
 Acceptance Criteria
 -------------------
@@ -290,25 +313,6 @@ D.  Analysis:
         editing SUTs at Remote will sync to test harness
 
 -   [v] Continuous monitoring test execution
-
-
-Enhancement
-===========
-
--   Handle local disconnect/re-connect to remote
-
--   As a remote tester, I want to validate TL and resource pool like ISO images
-    before test execution, so that I can ask maintainer for test environment preparation
-
--   Test data dry-run to validate itself and test harness
-
--   Remote users can access local (test harness) to install TL (into system) or download file
-    (related to disk space). It depends on discussion between tester, and is out of scope
-    of the architecture
-
--   "SUT management" auto-discovery feature
-
--   SUT status monitoring
 
 
 Implementation
