@@ -29,107 +29,6 @@ for example, automated test resource allocation, in the future.
 .. _test executions: `test execution`_
 
 
-Glossary
-========
-
-+--------------+---------------------------+
-| Abbreviation | Stands for                |
-+==============+===========================+
-| _`SUT`       | `System Under Test`_      |
-+--------------+---------------------------+
-| _`TD`        | `Test Data`_              |
-+--------------+---------------------------+
-| _`TE`        | `Test Execution`_         |
-+--------------+---------------------------+
-| _`TR`        | `Test Report`_            |
-+--------------+---------------------------+
-| _`TH`        | `Test Harness`_           |
-+--------------+---------------------------+
-| _`TaaS`      | `Test as a Service`_      |
-+--------------+---------------------------+
-| _`ATN`       | `Automated Test Network`_ |
-+--------------+---------------------------+
-
-.. _SUTs: SUT_
-
-+----------------------+----------------------------------------------------------------+
-| Term                 | Description                                                    |
-+======================+================================================================+
-| _`system under test` | The component or system to be tested. It could be a server,    |
-|                      | switch, VM, container, and so on.                              |
-+----------------------+----------------------------------------------------------------+
-| _`test object`       | i.e. `system under test`_.                                     |
-+----------------------+----------------------------------------------------------------+
-| _`test data`         | Compresses test cases, variables, test libraries,              |
-|                      | test drivers, and auto provisioning scripts.                   |
-+----------------------+----------------------------------------------------------------+
-| _`test report`       | A document summarizing testing activities and results,         |
-|                      | produced at regular intervals, to report progress of           |
-|                      | testing activities against a baseline (such as the             |
-|                      | original test plan) and to communicate risks and               |
-|                      | alternatives requiring a decision to management.               |
-+----------------------+----------------------------------------------------------------+
-| _`test environment`  | An environment containing hardware, instrumentation,           |
-|                      | simulators, software tools, and other support elements         |
-|                      | needed to conduct a test.                                      |
-+----------------------+----------------------------------------------------------------+
-| _`test harness`      | A `test environment`_ comprised of stubs and drivers needed to |
-|                      | execute a test.                                                |
-+----------------------+----------------------------------------------------------------+
-| _`test process`      | The fundamental `test process`_ comprises test planning and    |
-|                      | control, test analysis and design, test implementation and     |
-|                      | execution, evaluating exit criteria and reporting, and test    |
-|                      | closure activities.                                            |
-+----------------------+----------------------------------------------------------------+
-| _`test execution`    | The process of running a test on the component or              |
-|                      | `system under test`_, producing actual result(s)               |
-+----------------------+----------------------------------------------------------------+
-| _`test as a service` | An outsourcing model in which testing activities are           |
-|                      | performed by a service provider rather than self.              |
-+----------------------+----------------------------------------------------------------+
-| _`TaaS console`      | The web client of TaaS.                                        |
-+----------------------+----------------------------------------------------------------+
-| _`TaaS storage`      | The storage collecting `test data`_ and `test reports`_.       |
-+----------------------+----------------------------------------------------------------+
-
-.. _test objects: `test object`_
-.. _test reports: `test report`_
-.. _test environments: `test environment`_
-.. _test harnesses: `test harness`_
-
-Roles and Responsibilities:
-
-+------------------+------------------------------------------------------------+
-| Role             | Resposibility                                              |
-+==================+============================================================+
-| _`tester`        | A skilled professional who is involved in the testing of   |
-|                  | a component or system.                                     |
-+------------------+------------------------------------------------------------+
-| _`test manager`  | The person responsible for project management of           |
-|                  | testing activities and resources, and evaluation of a SUT. |
-|                  | The individual who directs, controls, administers, plans   |
-|                  | and regulates the evaluation of a SUT.                     |
-+------------------+------------------------------------------------------------+
-| _`test director` | A senior manager who manages test managers.                |
-+------------------+------------------------------------------------------------+
-| _`local tester`  | A `tester`_ works at local test environment who also       |
-|                  | responses for SUTs maintenance.                            |
-+------------------+------------------------------------------------------------+
-| _`remote tester` | A `tester`_ not works at local test environment.           |
-+------------------+------------------------------------------------------------+
-
-.. _testers: tester_
-.. _test directors: `test director`_
-.. _test managers: `test manager`_
-.. _local testers: `local tester`_
-.. _remote testers: `remote tester`_
-
-Reference: `ISTQB Glossary All Terms`_
-
-.. _ISTQB Glossary All Terms:
-    https://www.istqb.org/downloads/send/20-istqb-glossary/186-glossary-all-terms.html
-
-
 User stories
 ============
 
@@ -215,6 +114,118 @@ Test design:
 
 -   As a `test manager`_, I want enhanced test automation framework which is typed, so that creating more reliable test cases of `test data`_.
 -   As a `test manager`_, I want enhanced dry-run feature on `TaaS console`_, so that creating more reliable variables of `test data`_.
+
+
+Appendix
+========
+
+Abbreviation
+------------
+
++--------------+---------------------------+
+| Abbreviation | Stands for                |
++==============+===========================+
+| _`SUT`       | `System Under Test`_      |
++--------------+---------------------------+
+| _`TD`        | `Test Data`_              |
++--------------+---------------------------+
+| _`TE`        | `Test Execution`_         |
++--------------+---------------------------+
+| _`TR`        | `Test Report`_            |
++--------------+---------------------------+
+| _`TH`        | `Test Harness`_           |
++--------------+---------------------------+
+| _`TaaS`      | `Test as a Service`_      |
++--------------+---------------------------+
+| _`ATN`       | `Automated Test Network`_ |
++--------------+---------------------------+
+
+.. _SUTs: SUT_
+
+
+Terminology
+-----------
+
++----------------------+----------------------------------------------------------------+
+| Term                 | Description                                                    |
++======================+================================================================+
+| _`system under test` | The component or system to be tested. It could be a server,    |
+|                      | switch, VM, container, and so on.                              |
++----------------------+----------------------------------------------------------------+
+| _`test object`       | i.e. `system under test`_.                                     |
++----------------------+----------------------------------------------------------------+
+| _`test data`         | Compresses test cases, variables, test libraries,              |
+|                      | test drivers, and auto provisioning scripts.                   |
++----------------------+----------------------------------------------------------------+
+| _`test report`       | A document summarizing testing activities and results,         |
+|                      | produced at regular intervals, to report progress of           |
+|                      | testing activities against a baseline (such as the             |
+|                      | original test plan) and to communicate risks and               |
+|                      | alternatives requiring a decision to management.               |
++----------------------+----------------------------------------------------------------+
+| _`test environment`  | An environment containing hardware, instrumentation,           |
+|                      | simulators, software tools, and other support elements         |
+|                      | needed to conduct a test.                                      |
++----------------------+----------------------------------------------------------------+
+| _`test harness`      | A `test environment`_ comprised of stubs and drivers needed to |
+|                      | execute a test.                                                |
++----------------------+----------------------------------------------------------------+
+| _`test process`      | The fundamental `test process`_ comprises test planning and    |
+|                      | control, test analysis and design, test implementation and     |
+|                      | execution, evaluating exit criteria and reporting, and test    |
+|                      | closure activities.                                            |
++----------------------+----------------------------------------------------------------+
+| _`test execution`    | The process of running a test on the component or              |
+|                      | `system under test`_, producing actual result(s)               |
++----------------------+----------------------------------------------------------------+
+| _`test as a service` | An outsourcing model in which testing activities are           |
+|                      | performed by a service provider rather than self.              |
++----------------------+----------------------------------------------------------------+
+| _`TaaS console`      | The web client of TaaS.                                        |
++----------------------+----------------------------------------------------------------+
+| _`TaaS storage`      | The storage collecting `test data`_ and `test reports`_.       |
++----------------------+----------------------------------------------------------------+
+
+.. _test objects: `test object`_
+.. _test reports: `test report`_
+.. _test environments: `test environment`_
+.. _test harnesses: `test harness`_
+
+Roles and Responsibilities
+--------------------------
+
++------------------+------------------------------------------------------------+
+| Role             | Resposibility                                              |
++==================+============================================================+
+| _`tester`        | A skilled professional who is involved in the testing of   |
+|                  | a component or system.                                     |
++------------------+------------------------------------------------------------+
+| _`test manager`  | The person responsible for project management of           |
+|                  | testing activities and resources, and evaluation of a SUT. |
+|                  | The individual who directs, controls, administers, plans   |
+|                  | and regulates the evaluation of a SUT.                     |
++------------------+------------------------------------------------------------+
+| _`test director` | A senior manager who manages test managers.                |
++------------------+------------------------------------------------------------+
+| _`local tester`  | A `tester`_ works at local test environment who also       |
+|                  | responses for SUTs maintenance.                            |
++------------------+------------------------------------------------------------+
+| _`remote tester` | A `tester`_ not works at local test environment.           |
++------------------+------------------------------------------------------------+
+
+.. _testers: tester_
+.. _test directors: `test director`_
+.. _test managers: `test manager`_
+.. _local testers: `local tester`_
+.. _remote testers: `remote tester`_
+
+References
+----------
+
+-   `ISTQB Glossary All Terms`_
+
+.. _ISTQB Glossary All Terms:
+    https://www.istqb.org/downloads/send/20-istqb-glossary/186-glossary-all-terms.html
 
 
 Implementation
