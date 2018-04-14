@@ -1,3 +1,38 @@
+2018.04.13:
+
+After review ISTQB Term. I induce the definitions below::
+
+    spec = { {user story}, design, ... }
+    user story = { reason, acceptance criteria, ... }
+    acceptance criteria = { requirement | accepted by stakeholders }
+    use case = scenario ∈ feature ⊂ acceptance criteria
+
+In addition:
+
+-   `Acceptance testing` enable `stakeholders` to determine `acceptance criteria`;
+    `user acceptance testing` simulate `users` to satisfy `requirements`.
+
+-   Without `microservices`, it might be difficult to split SRS documents.
+
+-   In my SRS example, it doesn't contain implementation detail, instead,
+    it focus on `functional requirements` and `quality requirements`.
+
+-   Most of `requirements` in `user stories` are `functional requirements`;
+    most of `quality requirements` are not in `user stories`.
+
+-   `Requirement engineering`_ (also available for user stories) are not iterative in Waterfall,
+    and have methods:
+
+    -   `I* modeling language <https://en.wikipedia.org/wiki/I*>`_
+    -   other `modeling languages <https://en.wikipedia.org/wiki/Modeling_language>`_ (?!)
+
+    In Agile, refer to `rational unified process`_ for `requirement engineering`_ during iterations.
+
+    .. _rational unified process: https://en.wikipedia.org/wiki/Unified_Process
+    .. _requirement engineering: https://en.wikipedia.org/wiki/Requirements_engineering
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 2018.04.05:
 
 The 2nd POC is going to be closed.
