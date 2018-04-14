@@ -5,7 +5,7 @@ Automated Test Network (ATN) is an infrastructure which integrates test process 
 
 The repository provides only core implementation as a POC, for future enhancement, for example, automated test resource allocation.
 
-More about ATN, see `spec <spec.rst>`_
+More about ATN, see `spec <spec.rst>`_.
 
 
 Usage
@@ -16,6 +16,8 @@ Usage
 
 Development
 ===========
+
+See `log <log.rst>`_ for the development idea in the past.
 
 Format of the commit message
 ----------------------------
