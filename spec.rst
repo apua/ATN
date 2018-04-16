@@ -91,19 +91,42 @@ Perspective
 -   Enhance `test harnesses`_ to provide user interface to fulfill requirements comes from `local testers`_.
 -   `TaaS storage`_, `TaaS console`_, and enhanced `test harnesses`_ communicate with REST style API via HTTP(S); each of them is working software based on microservices architecture.
 
-File structure::
+`TaaS storage`_ API
+-------------------
 
-    .
-    ├── harness
-    │   └── autotest
-    └── taas
-        └── autotest
-        └── taas
+`TaaS storage`_ stores `test plan`_, `test data`_ (plain text and binary), final `test report`.
+It supports revision control. Every created/edited data has revision.
+According to the requirements, consider using CouchDB as backend.
 
-API
----
+`Test plan`_ API::
 
-(TODO: provide later)
+    HEAD/GET/PUT/DELETE     /test_plan/{unique_name}?rev={rev}
+
+Refer to http://docs.couchdb.org/en/2.1.1/api/document/common.html for detail.
+
+`Test data`_ API is similar to `test plan`_ API.
+
+First, test suites of `test data` are plain text since it's based on Robot Framework::
+
+    HEAD/GET/PUT/DELETE     /test_suite/{unique_name}?rev={rev}
+
+Particular binary data like ISO images require specifying their categories as URI
+based on the real situation::
+
+    HEAD/GET/PUT/DELETE     /media/{category}/{unique_filename}?rev={re}
+    HEAD/GET/PUT/DELETE     /media/os/esxi65_build5487.iso?rev={rev}
+
+Test library are stored as PyPY mirror sites thus following PyPY URI::
+
+    GET     /{package}/{unique_package_filename}
+    GET     /cirrus-library/cirrus-library-1.0.0b2-py3-none-any.whl
+
+Refer to http://docs.couchdb.org/en/2.1.1/api/document/attachments.html for detail.
+
+`TaaS console`_ API
+-------------------
+
+...
 
 Diagram
 -------

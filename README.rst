@@ -19,6 +19,17 @@ Development
 
 See `log <log.rst>`_ for the development idea in the past.
 
+File structure
+--------------
+
+::
+    .
+    ├── harness
+    │   └── autotest
+    └── taas
+        └── autotest
+        └── taas
+
 Format of the commit message
 ----------------------------
 
