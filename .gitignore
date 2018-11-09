@@ -1,19 +1,25 @@
 # ref: https://github.com/github/gitignore
 
 # Vim
+# ref: https://github.com/github/gitignore/blob/master/Global/Vim.gitignore
 [._]*.sw[op]
 
 # Python.gitignore
+# ref: https://github.com/github/gitignore/blob/master/Python.gitignore
 __pycache__/
 *.py[cod]
+# Unit test / coverage reports
+.pytest_cache/
 
 # Django development DB
 db.sqlite3
 
-# Django migration files
+# Django migration files (development only)
 migrations/
 
-# Django media files
+# Django media files (development only)
+# ref: https://docs.djangoproject.com/en/2.1/howto/static-files/#serving-files-uploaded-by-a-user-during-development
 harness/media/
+cirrus/media/
 
 venv
