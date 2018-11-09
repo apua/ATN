@@ -7,7 +7,7 @@ What it is
 
 This is a Django project for project "Cirrus".
 
-The core application `test_automation` is for test automation,
+The core application `autotest` is for test automation,
 providing HTTP REST API to maintain test suites and execute automated test with RobotFramework.
 
 
@@ -15,6 +15,11 @@ How to use
 ----------
 
 How to use the Django project will be added below in the fututre.
+
+.. code:: sh
+
+    $ ./manage.py migrate
+    $ ./manage.py createsuperuser
 
 
 How to maintain
@@ -26,4 +31,4 @@ How to maintain
 It is running as a side project "code: Zelda", in Kanban workflow.
 
 To understand the design, read the document as ref above;
-to understand detail spec of `test_automation`, read their docstrings and unit tests.
+to understand detail spec of `autotest`, read their docstrings and unit tests.
