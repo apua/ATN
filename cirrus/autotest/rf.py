@@ -1,36 +1,55 @@
 """
-Methods calling RobotFramework
+Methods calling RobotFramework.
 """
+import contextlib
+import os
+import subprocess as sp
 
-from contextlib import contextmanager
+import yaml
+
 from .apps import AutotestConfig as Config
 from .rq import task
 
 
-@contextmanager
-def exec_via_pybot(*, workdir, suite, suts):
+@contextlib.contextmanager
+def exec_via_pybot(*, dirname:str, suite:str, suts:dict) -> 'context of subprocess':
     """
-    :workdir: the name of working directory
+    :dirname: the name of working directory
     :suite: the text content of a test suite file
-    :suts: JSON/YAML data
+    :suts: parsed JSON/YAML data
     """
-    def write_file(filename, content):
-        with open(Config.workspace/workdir/filename, 'w') as f:
+    def write_file(filepath, content):
+        with filepath.open('w') as f:
             f.write(content)
 
-    write_file('suite.robot', suite)
-    write_file('suts.yaml', yaml.dump(suts))
+    workdir = Config.workspace/dirname
+    os.makedirs(workdir, exist_ok=True)
+    write_file(workdir/'suite.robot', suite)
+    write_file(workdir/'suts.yaml', yaml.dump(suts))
 
-    cmd = 'pybot -V suts.yaml -V vars.yaml suite.robot'
+    cmd = 'pybot -V suts.yaml suite.robot'
+    proc = sp.Popen(cmd, cwd=workdir, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
     try:
-        yield sp.Popen(cmd, cwd=Config.workspace/workdir, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-        #te.pid = proc.pid
-        #te.save(update_fields=['pid'])
-
-        #for line in proc.stdout:
-        #    ConsoleLine.objects.create(test_execution=te, output=line.decode())
+        yield proc
     finally:
         outs, errs = proc.communicate()
         assert outs == b''
         assert errs is None
         assert proc.returncode is not None
+
+
+@task
+def exec_test():
+    import textwrap
+    suite = textwrap.dedent("""\
+            *** test cases ***
+            T
+                log to console  &{ilo}[ip]
+            """)
+    suts = {'ilo': {'ip':'10.30.3.1','username':'root','password':'Compaq123'}}
+
+    with exec_via_pybot(dirname='mvp', suite=suite, suts=suts) as proc:
+        print('PID:', proc.pid)
+        print(*('=> ' + line.decode() for line in proc.stdout), sep='')
+
+    return proc.returncode
