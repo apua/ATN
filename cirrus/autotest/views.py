@@ -1,53 +1,87 @@
+import json
+
 from django.views import View
+from django.http import JsonResponse, HttpResponse
+from django.urls import reverse as urls_reverse
 
-from django.http import JsonResponse  #, HttpResponse, StreamingHttpResponse
+from .models import Suite, Job
 
 
-class SuiteIndexView(View):
+class SuiteCollectionView(View):
     """
-    get list, get query some, post new
+    View of suite collection
+
+    - GET for suites list (may with pagination or filtering in future implement)
+    - POST to add new suite
     """
     def get(self, request):
-        return JsonResponse({})
+        return JsonResponse(Suite.objects.to_list(), safe=False)
 
     def post(self, request):
-        return JsonResponse({})
+        suite = Suite.objects.create(content=json.loads(request.body)['content'])
+        response = JsonResponse({'id': suite.id}, status=201)
+        response['Location'] = urls_reverse('autotest:suite', args=(suite.id,))
+        return response
 
 
-class SuiteDetailView(View):
+class SuiteView(View):
     """
-    get detail, delete, put to edit
+    View of a suite
+
+    - GET for a suite content
+    - PUT to edit a suite
+    - DELETE to remove a suite (or archive it in future implement)
+    """
+    def get(self, request, id):
+        return JsonResponse(Suite.objects.get(id=id).to_dict())
+
+    def put(self, request, id):
+        Suite.objects.filter(id=id).update(content=json.loads(request.body)['content'])
+        return HttpResponse(status=204)
+
+    def delete(self, request, id):
+        Suite.objects.get(id=id).delete()
+        return HttpResponse(status=204)
+
+
+class JobCollectionView(View):
+    """
+    View of job collection
+
+    - GET for jobs list (may with pagination or filtering in future implement)
+    - POST to submit a job with a test suite and suts
     """
     def get(self, request):
-        return JsonResponse({})
-
-    def put(self, request):
-        return JsonResponse({})
-
-    def delete(self, request):
-        return JsonResponse({})
-
-
-class TaskIndexView(View):
-    """
-    get list, get query some, post to execute suite with suts
-    """
-    def get(self, request):
-        return JsonResponse({})
+        return JsonResponse(Job.objects.to_list(), safe=False)
 
     def post(self, request):
-        return JsonResponse({})
+        payload = json.loads(request.body)
+        suite_id = payload['suite_id']
+        suts = payload['suts']
+        suite_content = Suite.objects.get(id=suite_id).content
+        job = Job.objects.create(suite_reference_id=suite_id, suite_content=suite_content, suts=suts)
+        response = JsonResponse({'id': job.id}, status=201)
+        response['Location'] = urls_reverse('autotest:job', args=(job.id,))
+        return response
 
 
-class TaskDetailView(View):
+class JobView(View):
     """
-    get state and report, delete, post to re-execute its test data and variables
+    View of a job
+
+    - GET for a job state and properties
+    - POST to re-submit a test by its test suite and related suts
     """
-    def get(self, request):
-        return JsonResponse({})
+    def get(self, request, id):
+        return JsonResponse(Job.objects.get(id=id).to_dict())
 
-    def post(self, request):
-        return JsonResponse({})
-
-    def delete(self, request):
-        return JsonResponse({})
+    def post(self, request, id):
+        job = Job.objects.get(id=id)
+        new_job = Job.objects.create(
+                suite_reference=job.suite_reference,
+                suite_content=job.suite_content,
+                suts=job.suts,
+                )
+        response = JsonResponse({'id': new_job.id}, status=201)
+        response['Location'] = urls_reverse('autotest:job', args=(new_job.id,))
+        return response
