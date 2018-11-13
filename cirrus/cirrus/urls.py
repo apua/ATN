@@ -20,5 +20,6 @@ import autotest.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('autotest/', include(autotest.urls)),
 ]
