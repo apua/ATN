@@ -1,24 +1,22 @@
 import json
+import subprocess as sp
 import textwrap
-import unittest
 
-import django.test
-
-from .apps import AutotestConfig as Config
+from django.test import TestCase, override_settings
 
 
-class RobotFramework(unittest.TestCase):
+@override_settings(AUTOTEST_WORKSPACE='/tmp/test')
+class RobotFramework(TestCase):
     @classmethod
     def setUpClass(cls):
-        from pathlib import Path
-        cls.origin_workspace = Config.workspace
-        Config.workspace = Path('/tmp/unittest')
+        cmd = 'rq worker autotest'
+        cls.proc = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
 
     @classmethod
     def tearDownClass(cls):
-        Config.workspace = cls.origin_workspace
+        cls.proc.terminate()
 
-    def test_exec_via_pybot(self):
+    def test_01_exec_via_pybot(self):
         from . import rf
         suite = textwrap.dedent("""\
                 *** test cases ***
@@ -27,21 +25,21 @@ class RobotFramework(unittest.TestCase):
                 """)
         suts = {'ilo': {'ip':'10.30.3.1','username':'root','password':'Compaq123'}}
         with rf.exec_via_pybot(dirname='mvp', suite=suite, suts=suts) as proc:
-            #print('PID:', proc.pid)
-            #print(*('=> ' + line.decode() for line in proc.stdout), sep='')
-            list(proc.stdout)
+            pass
         assert proc.returncode == 0
 
-    def test_async_testexec(self):
+    def test_02_async_testexec(self):
         from . import rf, rq
+
         rq_job = rf.exec_test.delay()
         assert type(rq_job.id) is str
+
         rq.wait_for_finished(rq_job.id, timeout=3)
         returncode = rq_job.result
         assert returncode == 0
 
 
-class RestApi(django.test.TestCase):
+class RestApi(TestCase):
     test_data = textwrap.dedent("""\
             *** test cases ***
             T

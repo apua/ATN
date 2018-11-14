@@ -2,12 +2,13 @@
 Methods calling RobotFramework.
 """
 import contextlib
+import pathlib
 import os
 import subprocess as sp
 
 import yaml
+from django.conf import settings
 
-from .apps import AutotestConfig as Config
 from .rq import task
 
 
@@ -22,7 +23,7 @@ def exec_via_pybot(*, dirname:str, suite:str, suts:dict) -> 'context of subproce
         with filepath.open('w') as f:
             f.write(content)
 
-    workdir = Config.workspace/dirname
+    workdir = pathlib.Path(settings.AUTOTEST_WORKSPACE)/dirname
     os.makedirs(workdir, exist_ok=True)
     write_file(workdir/'suite.robot', suite)
     write_file(workdir/'suts.yaml', yaml.dump(suts))
@@ -33,9 +34,6 @@ def exec_via_pybot(*, dirname:str, suite:str, suts:dict) -> 'context of subproce
         yield proc
     finally:
         outs, errs = proc.communicate()
-        assert outs == b''
-        assert errs is None
-        assert proc.returncode is not None
 
 
 @task

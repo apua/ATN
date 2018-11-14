@@ -32,3 +32,11 @@ It is running as a side project "code: Zelda", in Kanban workflow.
 
 To understand the design, read the document as ref above;
 to understand detail spec of `autotest`, read their docstrings and unit tests.
+
+
+How to test
+-----------
+
+.. code:: sh
+
+    $ ./manage.py test --failfast -v 2
