@@ -24,12 +24,12 @@ def exec_via_pybot(*, dirname:str, suite:str, suts:dict) -> 'context of subproce
             f.write(content)
 
     workdir = pathlib.Path(settings.AUTOTEST_WORKSPACE)/dirname
-    os.makedirs(workdir, exist_ok=True)
+    os.makedirs(workdir.as_posix(), exist_ok=True)
     write_file(workdir/'suite.robot', suite)
     write_file(workdir/'suts.yaml', yaml.dump(suts))
 
     cmd = 'pybot -V suts.yaml suite.robot'
-    proc = sp.Popen(cmd, cwd=workdir, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
+    proc = sp.Popen(cmd, cwd=workdir.as_posix(), shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
     try:
         yield proc
     finally:

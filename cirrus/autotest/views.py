@@ -18,7 +18,8 @@ class SuiteCollectionView(View):
         return JsonResponse(Suite.objects.to_list(), safe=False)
 
     def post(self, request):
-        suite = Suite.objects.create(content=json.loads(request.body)['content'])
+        payload = json.loads(request.body.decode())
+        suite = Suite.objects.create(content=payload['content'])
         response = JsonResponse({'id': suite.id}, status=201)
         response['Location'] = urls_reverse('autotest:suite', args=(suite.id,))
         return response
@@ -36,7 +37,8 @@ class SuiteView(View):
         return JsonResponse(Suite.objects.get(id=id).to_dict())
 
     def put(self, request, id):
-        Suite.objects.filter(id=id).update(content=json.loads(request.body)['content'])
+        payload = json.loads(request.body.decode())
+        Suite.objects.filter(id=id).update(content=payload['content'])
         return HttpResponse(status=204)
 
     def delete(self, request, id):
@@ -55,7 +57,7 @@ class JobCollectionView(View):
         return JsonResponse(Job.objects.to_list(), safe=False)
 
     def post(self, request):
-        payload = json.loads(request.body)
+        payload = json.loads(request.body.decode())
         suite_id = payload['suite_id']
         suts = payload['suts']
         suite_content = Suite.objects.get(id=suite_id).content
